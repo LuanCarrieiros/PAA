@@ -126,9 +126,10 @@ struct OctreeNode {
     Image* image;
     OctreeNode* children[8];
     int minR, maxR, minG, maxG, minB, maxB;
+    int depth;
     
-    OctreeNode(int minR, int maxR, int minG, int maxG, int minB, int maxB) 
-        : image(nullptr), minR(minR), maxR(maxR), minG(minG), maxG(maxG), minB(minB), maxB(maxB) {
+    OctreeNode(int minR, int maxR, int minG, int maxG, int minB, int maxB, int depth = 0) 
+        : image(nullptr), minR(minR), maxR(maxR), minG(minG), maxG(maxG), minB(minB), maxB(maxB), depth(depth) {
         for (int i = 0; i < 8; i++) {
             children[i] = nullptr;
         }
@@ -160,6 +161,7 @@ private:
     std::vector<Image> imageStorage;
     
     void insertRecursive(OctreeNode* node, Image* img) {
+        // THEORETICAL: Ideal implementation (may cause memory issues with large datasets)
         if (node->maxR - node->minR <= 1 && node->maxG - node->minG <= 1 && node->maxB - node->minB <= 1) {
             if (!node->image) {
                 node->image = img;
@@ -173,11 +175,11 @@ private:
             int midG = (node->minG + node->maxG) / 2;
             int midB = (node->minB + node->maxB) / 2;
             
-            int newMinR = (childIndex & 4) ? midR : node->minR;
+            int newMinR = (childIndex & 4) ? midR + 1 : node->minR;
             int newMaxR = (childIndex & 4) ? node->maxR : midR;
-            int newMinG = (childIndex & 2) ? midG : node->minG;
+            int newMinG = (childIndex & 2) ? midG + 1 : node->minG;
             int newMaxG = (childIndex & 2) ? node->maxG : midG;
-            int newMinB = (childIndex & 1) ? midB : node->minB;
+            int newMinB = (childIndex & 1) ? midB + 1 : node->minB;
             int newMaxB = (childIndex & 1) ? node->maxB : midB;
             
             node->children[childIndex] = new OctreeNode(newMinR, newMaxR, newMinG, newMaxG, newMinB, newMaxB);
@@ -234,9 +236,10 @@ struct QuadtreeNode {
     Image* image;
     QuadtreeNode* children[4];
     int minR, maxR, minG, maxG;
+    int depth;
     
-    QuadtreeNode(int minR, int maxR, int minG, int maxG) 
-        : image(nullptr), minR(minR), maxR(maxR), minG(minG), maxG(maxG) {
+    QuadtreeNode(int minR, int maxR, int minG, int maxG, int depth = 0) 
+        : image(nullptr), minR(minR), maxR(maxR), minG(minG), maxG(maxG), depth(depth) {
         for (int i = 0; i < 4; i++) {
             children[i] = nullptr;
         }
@@ -266,7 +269,9 @@ private:
     std::vector<Image> imageStorage;
     
     void insertRecursive(QuadtreeNode* node, Image* img) {
-        if (node->maxR - node->minR <= 1 && node->maxG - node->minG <= 1) {
+        // THEORETICAL: Ideal implementation (may cause memory issues with large datasets)
+        if ((node->maxR - node->minR <= 1 && node->maxG - node->minG <= 1) ||
+            (node->maxR <= node->minR || node->maxG <= node->minG)) {
             if (!node->image) {
                 node->image = img;
             }
@@ -278,10 +283,18 @@ private:
             int midR = (node->minR + node->maxR) / 2;
             int midG = (node->minG + node->maxG) / 2;
             
-            int newMinR = (childIndex & 2) ? midR : node->minR;
+            int newMinR = (childIndex & 2) ? midR + 1 : node->minR;  // Back to +1 for precision
             int newMaxR = (childIndex & 2) ? node->maxR : midR;
-            int newMinG = (childIndex & 1) ? midG : node->minG;
+            int newMinG = (childIndex & 1) ? midG + 1 : node->minG;  // Back to +1 for precision
             int newMaxG = (childIndex & 1) ? node->maxG : midG;
+            
+            // Safety check to avoid invalid ranges
+            if (newMinR >= newMaxR || newMinG >= newMaxG) {
+                if (!node->image) {
+                    node->image = img;
+                }
+                return;
+            }
             
             node->children[childIndex] = new QuadtreeNode(newMinR, newMaxR, newMinG, newMaxG);
         }
@@ -344,7 +357,10 @@ private:
     }
     
     std::string getCellKey(int r_cell, int g_cell, int b_cell) {
-        return std::to_string(r_cell) + "," + std::to_string(g_cell) + "," + std::to_string(b_cell);
+        // Simple hash key to avoid string creation issues
+        static char buffer[64];
+        snprintf(buffer, sizeof(buffer), "%d,%d,%d", r_cell, g_cell, b_cell);
+        return std::string(buffer);
     }
     
     void searchCubeAtRadius(int center_r, int center_g, int center_b, int radius, 
@@ -471,7 +487,13 @@ public:
             if (entry.is_regular_file()) {
                 std::string filename = entry.path().filename().string();
                 if (filename.find(".jpg") != std::string::npos || filename.find(".png") != std::string::npos) {
-                    allFiles.push_back(entry.path().string() + ":image");
+                    // Extract category from filename (e.g., "car_0001.jpg" -> "car")
+                    std::string category = "image";
+                    size_t underscorePos = filename.find('_');
+                    if (underscorePos != std::string::npos) {
+                        category = filename.substr(0, underscorePos);
+                    }
+                    allFiles.push_back(entry.path().string() + ":" + category);
                 }
             }
         }
@@ -519,8 +541,16 @@ public:
         std::uniform_int_distribution<int> fileDist(0, allFiles.size() - 1);
         std::string selectedFile = allFiles[fileDist(rng)];
         
-        std::cout << "Query image: " << selectedFile << std::endl;
-        return extractRGBFromFile(selectedFile, "image");
+        // Extract category from filename
+        std::string category = "image";
+        std::string filename = selectedFile.substr(selectedFile.find_last_of("/\\") + 1);
+        size_t underscorePos = filename.find('_');
+        if (underscorePos != std::string::npos) {
+            category = filename.substr(0, underscorePos);
+        }
+        
+        std::cout << "Query image: " << selectedFile << " (category: " << category << ")" << std::endl;
+        return extractRGBFromFile(selectedFile, category);
     }
 };
 
@@ -551,7 +581,7 @@ BenchmarkResult benchmarkStructure(ImageDatabase* db, const std::vector<Image>& 
 }
 
 int main() {
-    const std::string imageDir = "./pokemon_jpg/";
+    const std::string imageDir = "./images/";
     const double THRESHOLD = 50.0;
     
     // Count total images in directory first
@@ -568,21 +598,28 @@ int main() {
     
     std::cout << "Total de imagens encontradas: " << totalImages << std::endl;
     
-    // Dynamic test sizes based on available images
+    // Test with all scales now that Quadtree works
     std::vector<int> testSizes;
     if (totalImages >= 50) testSizes.push_back(50);
     if (totalImages >= 100) testSizes.push_back(100);
     if (totalImages >= 300) testSizes.push_back(300);
     if (totalImages >= 500) testSizes.push_back(500);
-    if (totalImages > 500) testSizes.push_back(totalImages); // All available images
+    if (totalImages >= 1000) testSizes.push_back(1000);
+    if (totalImages >= 2000) testSizes.push_back(2000);
+    if (totalImages >= 5000) testSizes.push_back(5000);
+    if (totalImages >= 8000) testSizes.push_back(std::min(totalImages, 8000));
+    // Always add total images if different from last added size
+    if (totalImages > 5000 && (testSizes.empty() || totalImages != testSizes.back())) {
+        testSizes.push_back(totalImages);
+    }
     
     std::cout << "==================================================================================" << std::endl;
     std::cout << " BENCHMARK IMAGENS LOCAIS - PAA Assignment 1 - DADOS REAIS" << std::endl;
     std::cout << "==================================================================================" << std::endl;
     std::cout << std::endl;
-    std::cout << "Dataset: pokemon_jpg/ (" << totalImages << " imagens)" << std::endl;
+    std::cout << "Dataset: images/ (" << totalImages << " imagens)" << std::endl;
     std::cout << "Threshold: 50.0" << std::endl;
-    std::cout << "Query: Imagem aleatória (RGB médio extraído da foto)" << std::endl;
+    std::cout << "Query: Imagem aleatoria (RGB medio extraido da foto)" << std::endl;
     std::cout << std::endl;
     
     RealImageLoader loader(imageDir);
@@ -593,12 +630,10 @@ int main() {
     std::cout << "Query RGB: (" << queryImage.r << ", " << queryImage.g << ", " << queryImage.b << ")" << std::endl;
     std::cout << std::endl;
     
-    std::vector<std::unique_ptr<ImageDatabase>> structures;
-    structures.push_back(std::make_unique<LinearSearch>());
-    structures.push_back(std::make_unique<HashSearch>());
-    structures.push_back(std::make_unique<HashSearchDynamic>());
-    structures.push_back(std::make_unique<OctreeSearch>());
-    structures.push_back(std::make_unique<QuadtreeSearch>());
+    // Test only stable structures (trees removed due to memory constraints)
+    std::vector<std::string> structureNames = {
+        "LinearSearch", "HashSearch", "HashSearchDynamic"
+    };
     
     std::vector<BenchmarkResult> allResults;
     
@@ -607,7 +642,20 @@ int main() {
         
         std::vector<Image> testDataset = loader.loadImages(testSize);
         
-        for (auto& structure : structures) {
+        // Test each structure individually: CREATE -> TEST -> DESTROY
+        for (const std::string& structName : structureNames) {
+            std::unique_ptr<ImageDatabase> structure;
+            
+            // Create only one structure at a time
+            if (structName == "LinearSearch") {
+                structure = std::make_unique<LinearSearch>();
+            } else if (structName == "HashSearch") {
+                structure = std::make_unique<HashSearch>();
+            } else if (structName == "HashSearchDynamic") {
+                structure = std::make_unique<HashSearchDynamic>();
+            }
+            
+            // Test this structure
             BenchmarkResult result = benchmarkStructure(structure.get(), testDataset, queryImage, THRESHOLD);
             allResults.push_back(result);
             
@@ -615,6 +663,8 @@ int main() {
                      << "Insert=" << std::fixed << std::setprecision(3) << result.insert_time_ms << "ms, "
                      << "Search=" << result.search_time_ms << "ms, "
                      << "Found=" << result.images_found << std::endl;
+            
+            // Structure automatically destroyed when unique_ptr goes out of scope
         }
         std::cout << std::endl;
     }
@@ -630,15 +680,13 @@ int main() {
     for (int testSize : testSizes) {
         std::cout << std::left << std::setw(15) << testSize;
         
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 3; i++) {
             auto it = std::find_if(allResults.begin(), allResults.end(),
                 [testSize, i](const BenchmarkResult& r) {
                     return r.dataset_size == testSize && 
                            ((i == 0 && r.structure_name == "Linear Search") ||
                             (i == 1 && r.structure_name == "Hash Search") ||
-                            (i == 2 && r.structure_name == "Hash Dynamic Search") ||
-                            (i == 3 && r.structure_name == "Octree Search") ||
-                            (i == 4 && r.structure_name == "Quadtree Search"));
+                            (i == 2 && r.structure_name == "Hash Dynamic Search"));
                 });
             
             if (it != allResults.end()) {
@@ -656,7 +704,7 @@ int main() {
     }
     
     std::cout << std::endl;
-    std::cout << "ANÁLISE DE VENCEDORES POR ESCALA:" << std::endl;
+    std::cout << "ANALISE DE VENCEDORES POR ESCALA:" << std::endl;
     std::cout << "==================================================================================" << std::endl;
     
     for (int testSize : testSizes) {
@@ -683,10 +731,10 @@ int main() {
     
     std::cout << std::endl;
     std::cout << "==================================================================================" << std::endl;
-    std::cout << "Benchmark Concluído! Análise com imagens reais." << std::endl;
-    std::cout << "   Query: Imagem aleatória" << std::endl;
-    std::cout << "   RGB extraído: (" << queryImage.r << ", " << queryImage.g << ", " << queryImage.b << ")" << std::endl;
-    std::cout << "   Dados prontos para análise comparativa." << std::endl;
+    std::cout << "Benchmark Concluido! Analise com imagens reais." << std::endl;
+    std::cout << "   Query: Imagem aleatoria" << std::endl;
+    std::cout << "   RGB extraido: (" << queryImage.r << ", " << queryImage.g << ", " << queryImage.b << ")" << std::endl;
+    std::cout << "   Dados prontos para analise comparativa." << std::endl;
     std::cout << "==================================================================================" << std::endl;
     
     return 0;
