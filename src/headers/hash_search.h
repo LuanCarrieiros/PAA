@@ -4,6 +4,9 @@
 #include <unordered_map>
 #include <vector>
 #include <string>
+#include <algorithm>
+#include <iostream>
+#include <cmath>
 
 // Hash Table baseada em grid 3D do espaço RGB
 class HashSearch : public ImageDatabase {
@@ -32,6 +35,46 @@ private:
         return std::to_string(r_cell) + "," + std::to_string(g_cell) + "," + std::to_string(b_cell);
     }
     
+    // Search cells at specific radius from center (dynamic expanding cube)
+    void searchCubeAtRadius(int center_r, int center_g, int center_b, int radius, 
+                           const Image& query, double threshold, std::vector<Image>& results) const {
+        if (radius == 0) {
+            // Search only center cell for radius 0
+            searchSingleCell(center_r, center_g, center_b, query, threshold, results);
+            return;
+        }
+        
+        // Search cells that are exactly at 'radius' distance (cube boundary)
+        for (int dr = -radius; dr <= radius; dr++) {
+            for (int dg = -radius; dg <= radius; dg++) {
+                for (int db = -radius; db <= radius; db++) {
+                    // Only search cells at the boundary of current radius (Manhattan distance)
+                    if (abs(dr) + abs(dg) + abs(db) == radius || 
+                        (abs(dr) == radius || abs(dg) == radius || abs(db) == radius)) {
+                        searchSingleCell(center_r + dr, center_g + dg, center_b + db, 
+                                       query, threshold, results);
+                    }
+                }
+            }
+        }
+    }
+    
+    // Search a single cell and add matching images to results
+    void searchSingleCell(int r_cell, int g_cell, int b_cell, 
+                         const Image& query, double threshold, std::vector<Image>& results) const {
+        std::string key = getCellKey(r_cell, g_cell, b_cell);
+        
+        auto it = grid.find(key);
+        if (it != grid.end()) {
+            for (const auto& img : it->second) {
+                double distance = query.distanceTo(img);
+                if (distance <= threshold) {
+                    results.push_back(img);
+                }
+            }
+        }
+    }
+    
 public:
     // Construtor - cellSize determina granularidade do hash
     HashSearch(double _cellSize = 30.0) : cellSize(_cellSize) {}
@@ -42,6 +85,11 @@ public:
     }
     
     std::vector<Image> findSimilar(const Image& query, double threshold) override {
+        return findSimilarDynamic(query, threshold, -1); // -1 = no result limit
+    }
+    
+    // Dynamic search with expanding cube and early termination
+    std::vector<Image> findSimilarDynamic(const Image& query, double threshold, int maxResults = -1) {
         std::vector<Image> results;
         
         // Determinar células base da consulta
@@ -50,25 +98,24 @@ public:
         int query_b = rgbToCell(query.b);
         
         // Calcular quantas células precisamos verificar baseado no threshold
-        int cell_radius = static_cast<int>(ceil(threshold / cellSize));
+        int max_radius = static_cast<int>(ceil(threshold / cellSize));
         
-        // Buscar em células vizinhas (cubo 3D)
-        for (int dr = -cell_radius; dr <= cell_radius; dr++) {
-            for (int dg = -cell_radius; dg <= cell_radius; dg++) {
-                for (int db = -cell_radius; db <= cell_radius; db++) {
-                    std::string key = getCellKey(query_r + dr, query_g + dg, query_b + db);
-                    
-                    // Se a célula existe, verificar todas as imagens nela
-                    auto it = grid.find(key);
-                    if (it != grid.end()) {
-                        for (const auto& img : it->second) {
-                            double distance = query.distanceTo(img);
-                            if (distance <= threshold) {
-                                results.push_back(img);
-                            }
-                        }
-                    }
-                }
+        // Dynamic search: expand from query cell outward
+        for (int radius = 0; radius <= max_radius; radius++) {
+            size_t results_before = results.size();
+            
+            // Search cells at current radius
+            searchCubeAtRadius(query_r, query_g, query_b, radius, query, threshold, results);
+            
+            // Early termination: if we found enough results, stop
+            if (maxResults > 0 && static_cast<int>(results.size()) >= maxResults) {
+                break;
+            }
+            
+            // Early termination: if no new results found at this radius and we already have some
+            if (radius > 0 && results.size() == results_before && !results.empty()) {
+                // Optional: could break here for aggressive early termination
+                // break;
             }
         }
         
@@ -78,11 +125,25 @@ public:
                      return query.distanceTo(a) < query.distanceTo(b);
                  });
         
+        // Limit results if requested
+        if (maxResults > 0 && static_cast<int>(results.size()) > maxResults) {
+            results.erase(results.begin() + maxResults, results.end());
+        }
+        
         return results;
     }
     
     std::string getName() const override {
-        return "Hash Search (Grid-based, cell=" + std::to_string(cellSize) + ")";
+        return "Hash Search (Dynamic, cell=" + std::to_string(cellSize) + ")";
+    }
+    
+    // Public interface for dynamic search with configurable parameters
+    std::vector<Image> findSimilarWithLimit(const Image& query, double threshold, int maxResults) {
+        return findSimilarDynamic(query, threshold, maxResults);
+    }
+    
+    void clear() {
+        grid.clear();
     }
     
     // Métodos para análise
