@@ -8,21 +8,21 @@
 #include <iostream>
 #include <cmath>
 
-// Hash Table baseada em grid 3D do espaço RGB
+// Hash Table baseada em grid 3D do espaco RGB
 class HashSearch : public ImageDatabase {
 private:
-    // Tamanho da célula do grid (quanto menor, mais preciso mas mais células)
+    // Tamanho da celula do grid (quanto menor, mais preciso mas mais celulas)
     double cellSize;
     
-    // Hash table: key = "r,g,b" da célula, value = lista de imagens nessa célula
+    // Hash table: key = "r,g,b" da celula, value = lista de imagens nessa celula
     std::unordered_map<std::string, std::vector<Image>> grid;
     
-    // Converte coordenada RGB para coordenada da célula
+    // Converte coordenada RGB para coordenada da celula
     int rgbToCell(double value) const {
         return static_cast<int>(value / cellSize);
     }
     
-    // Gera chave da célula para uma imagem
+    // Gera chave da celula para uma imagem
     std::string getCellKey(const Image& img) const {
         int r_cell = rgbToCell(img.r);
         int g_cell = rgbToCell(img.g);
@@ -30,7 +30,7 @@ private:
         return std::to_string(r_cell) + "," + std::to_string(g_cell) + "," + std::to_string(b_cell);
     }
     
-    // Gera chave da célula para coordenadas específicas
+    // Gera chave da celula para coordenadas especificas
     std::string getCellKey(int r_cell, int g_cell, int b_cell) const {
         return std::to_string(r_cell) + "," + std::to_string(g_cell) + "," + std::to_string(b_cell);
     }
@@ -92,12 +92,12 @@ public:
     std::vector<Image> findSimilarDynamic(const Image& query, double threshold, int maxResults = -1) {
         std::vector<Image> results;
         
-        // Determinar células base da consulta
+        // Determinar celulas base da consulta
         int query_r = rgbToCell(query.r);
         int query_g = rgbToCell(query.g);
         int query_b = rgbToCell(query.b);
         
-        // Calcular quantas células precisamos verificar baseado no threshold
+        // Calcular quantas celulas precisamos verificar baseado no threshold
         int max_radius = static_cast<int>(ceil(threshold / cellSize));
         
         // Dynamic search: expand from query cell outward
@@ -119,7 +119,7 @@ public:
             }
         }
         
-        // Ordena por distância
+        // Ordena por distancia
         std::sort(results.begin(), results.end(), 
                  [&query](const Image& a, const Image& b) {
                      return query.distanceTo(a) < query.distanceTo(b);
@@ -146,7 +146,7 @@ public:
         grid.clear();
     }
     
-    // Métodos para análise
+    // Metodos para analise
     size_t getNumCells() const {
         return grid.size();
     }
@@ -163,19 +163,19 @@ public:
     
     void printStats() const {
         std::cout << "Hash Table Stats:" << std::endl;
-        std::cout << "  Células ativas: " << getNumCells() << std::endl;
-        std::cout << "  Tamanho médio da célula: " << getAverageCellSize() << " imagens" << std::endl;
+        std::cout << "  Celulas ativas: " << getNumCells() << std::endl;
+        std::cout << "  Tamanho medio da celula: " << getAverageCellSize() << " imagens" << std::endl;
         std::cout << "  Cell size: " << cellSize << std::endl;
         
-        // Distribuição de tamanhos
+        // Distribuicao de tamanhos
         std::vector<int> cellSizes;
         for (const auto& pair : grid) {
             cellSizes.push_back(pair.second.size());
         }
         if (!cellSizes.empty()) {
             std::sort(cellSizes.begin(), cellSizes.end());
-            std::cout << "  Menor célula: " << cellSizes.front() << " imagens" << std::endl;
-            std::cout << "  Maior célula: " << cellSizes.back() << " imagens" << std::endl;
+            std::cout << "  Menor celula: " << cellSizes.front() << " imagens" << std::endl;
+            std::cout << "  Maior celula: " << cellSizes.back() << " imagens" << std::endl;
             std::cout << "  Mediana: " << cellSizes[cellSizes.size()/2] << " imagens" << std::endl;
         }
     }
