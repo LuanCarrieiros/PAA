@@ -305,7 +305,9 @@ Based on our empirical analysis, we propose the following selection criteria:
 
 \begin{itemize}
     \item \textbf{Small datasets (<5K images):} Linear Search offers simplicity and guaranteed precision
+    
     \item \textbf{Medium datasets (5K-1M images):} Hash Search provides optimal search performance
+    
     \item \textbf{Large datasets (>1M images):} Selection depends on precision requirements
     \begin{itemize}
         \item Speed priority: Hash Search
@@ -337,7 +339,7 @@ Future research directions include exploring hybrid approaches that combine mult
 This section details the individual contributions of each team member to the research, implementation, and analysis presented in this work.
 
 \begin{itemize}
-    \item \textbf{Luan Barbosa Rosa Carrieiros:} Led the project design and implementation architecture, developing the core benchmarking framework and unified interface design. Responsible for the Hash Dynamic Search algorithm implementation, memory management optimization strategies, and the comprehensive experimental methodology. Contributed extensively to the large-scale synthetic dataset evaluation and statistical analysis of results.
+    \item \textbf{Luan Barbosa Rosa Carrieiros:} Led the project design and implementation architecture, developing the core benchmarking framework and unified interface design. Responsible for the Hash Dynamic Search algorithm implementation, memory management optimization strategies, and the comprehensive experimental methodology. Contributed extensively to the large-scale synthetic dataset evaluation, statistical analysis of results, and the main implementation in \texttt{main.cpp}.
     
     \item \textbf{Diego Moreira Rocha:} Focused on the implementation and optimization of tree-based data structures (Octree and Quadtree), including the geometric pruning algorithms and spatial partitioning strategies. Contributed to the real image dataset processing and evaluation framework, particularly in the precision analysis components.
     
