@@ -487,13 +487,13 @@ BenchmarkResult benchmarkStructure(std::unique_ptr<ImageDatabase> db,
         db->insert(img);
     }
     auto endInsert = std::chrono::high_resolution_clock::now();
-    result.insertTime = std::chrono::duration<double, std::nano>(endInsert - startInsert).count();
+    result.insertTime = std::chrono::duration<double>(endInsert - startInsert).count();
     
     // Teste de Busca
     auto startSearch = std::chrono::high_resolution_clock::now();
     auto results = db->findSimilar(query, threshold);
     auto endSearch = std::chrono::high_resolution_clock::now();
-    result.searchTime = std::chrono::duration<double, std::nano>(endSearch - startSearch).count();
+    result.searchTime = std::chrono::duration<double>(endSearch - startSearch).count();
     result.resultsFound = results.size();
     
     return result;
@@ -544,7 +544,7 @@ int main() {
             allResults.push_back(result);
             
             // Mostrar resultado imediatamente no estilo dos benchmarks de imagem
-            printf("  %s: Insert=%.0fns, Search=%.0fns, Found=%d\n", 
+            printf("  %s: Insert=%.6fs, Search=%.6fs, Found=%d\n", 
                    result.structureName.c_str(), result.insertTime, result.searchTime, result.resultsFound);
             
             // Dataset sai de escopo aqui e libera memoria automaticamente
@@ -557,7 +557,7 @@ int main() {
     std::cout << "==================================================================================\n\n";
     
     // Cabecalho da tabela
-    printf("%-10s %-15s %-12s %-12s %-8s\n", "Dataset", "Estrutura", "Insert(ns)", "Search(ns)", "Found");
+    printf("%-10s %-15s %-12s %-12s %-8s\n", "Dataset", "Estrutura", "Insert(s)", "Search(s)", "Found");
     std::cout << "-------------------------------------------------------------------------------\n";
     
     // Dados organizados por escala
@@ -602,7 +602,7 @@ int main() {
             }
         }
         
-        printf("%-10d | Insert: %-15s (%.0fns) | Search: %-15s (%.0fns)\n", 
+        printf("%-10d | Insert: %-15s (%.6fs) | Search: %-15s (%.6fs)\n", 
                scale, bestInsertName.c_str(), bestInsert, 
                bestSearchName.c_str(), bestSearch);
     }
