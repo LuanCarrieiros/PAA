@@ -9,6 +9,7 @@ rec_iter
 benchmark_100m
 benchmark_local
 benchmark_simple
+benchmark_imagens_locais
 
 # Arquivos de compilação
 *.o
@@ -45,6 +46,12 @@ Release/
 # Dados muito grandes (opcional)
 # Images/natural_images/*.jpg
 # *.txt
+
+# Imagens do dataset (muito grandes para commit)
+images/
+images/*.jpg
+images/*.png
+images/*.jpeg
 
 # Arquivos de backup
 *.bak
