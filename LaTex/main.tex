@@ -229,24 +229,24 @@ Table~\ref{tab:synthetic_performance} presents performance results for synthetic
 \begin{table}[H]
     \footnotesize 
     \centering
-    \caption{Performance Comparison on Synthetic Datasets (Insertion/Search times in microseconds)}
+    \caption{Performance Comparison on Synthetic Datasets (Insertion/Search times in nanoseconds)}
     \label{tab:synthetic_performance}
     \setlength{\tabcolsep}{3pt}
     \begin{tabularx}{\columnwidth}{|l|c|c|c|c|c|}
         \hline
         \textbf{Scale} & \textbf{Linear} & \textbf{Hash} & \textbf{Hash Dynamic} & \textbf{Octree} & \textbf{Quadtree} \\
         \hline
-        1K & 82/5 & \textbf{163/1} & 165/2 & 227/13 & 148/11 \\
-        10K & \textbf{750}/63 & 1811/\textbf{1} & 1820/11 & 2270/88 & 2348/74 \\
-        100K & \textbf{6782}/542 & 19542/\textbf{31} & 19680/98 & 28430/980 & 30286/917 \\
-        1M & \textbf{66646}/7045 & 173945/\textbf{187} & 174220/445 & 477827/20957 & 365093/15751 \\
-        50M & \textbf{5752689}/520698 & 42529801/\textbf{17987} & 42847132/89441 & 82092444/2603842 & 72793606/1759648 \\
+        1K & 82000/5000 & \textbf{163000/1000} & 165000/2000 & 227000/13000 & 148000/11000 \\
+        10K & \textbf{750000}/63000 & 1811000/\textbf{1000} & 1820000/11000 & 2270000/88000 & 2348000/74000 \\
+        100K & \textbf{6782000}/542000 & 19542000/\textbf{31000} & 19680000/98000 & 28430000/980000 & 30286000/917000 \\
+        1M & \textbf{66646000}/7045000 & 173945000/\textbf{187000} & 174220000/445000 & 477827000/20957000 & 365093000/15751000 \\
+        50M & \textbf{5752689000}/520698000 & 42529801000/\textbf{17987000} & 42847132000/89441000 & 82092444000/2603842000 & 72793606000/1759648000 \\
         \hline
     \end{tabularx}
     \vspace{0.2cm}
     \begin{minipage}{\columnwidth}
     \footnotesize
-    \textit{Format: Insertion time / Search time in microseconds (μs). Bold indicates best performance in category.}
+    \textit{Format: Insertion time / Search time in nanoseconds (ns). Bold indicates best performance in category.}
     \end{minipage}
 \end{table}
 
@@ -254,7 +254,7 @@ Table~\ref{tab:synthetic_performance} presents performance results for synthetic
 
 \begin{itemize}
     \item \textbf{Insertion Dominance:} Linear Search consistently achieves the fastest insertion times across all scales, demonstrating the efficiency of direct array append operations.
-    \item \textbf{Search Supremacy:} Hash Search dominates search performance, achieving remarkable scalability with only 18μs search time for 50 million images.
+    \item \textbf{Search Supremacy:} Hash Search dominates search performance, achieving remarkable scalability with only 17,987,000ns search time for 50 million images.
     \item \textbf{Dimensional Paradox:} Quadtree consistently outperforms Octree despite using fewer spatial dimensions, suggesting that the curse of dimensionality affects tree structures more than anticipated.
 \end{itemize}
 
@@ -308,24 +308,24 @@ Beyond visual quality assessment, computational efficiency represents a critical
     \setlength{\tabcolsep}{3pt}
     \begin{tabularx}{\columnwidth}{|l|l|c|c|}
         \hline
-        \textbf{Data Structure} & \textbf{Dataset Size} & \textbf{Insertion (μs)} & \textbf{Search (μs)} \\ 
+        \textbf{Data Structure} & \textbf{Dataset Size} & \textbf{Insertion (ns)} & \textbf{Search (ns)} \\ 
         \hline
-        Linear Search & 100K images & 6782 & 542 \\
-        Linear Search & 10M images & 3451245 & 234567 \\
-        Hash Search & 100K images & 19542 & 31 \\
-        Hash Search & 10M images & 8527603 & 3598 \\
-        Hash Dynamic & 100K images & 19680 & 98 \\
-        Hash Dynamic & 10M images & 8567890 & 17890 \\
-        Octree Search & 100K images & 28430 & 980 \\
-        Octree Search & 10M images & 16458723 & 521847 \\
-        Quadtree Search & 100K images & 30286 & 917 \\
-        Quadtree Search & 10M images & 14563872 & 351902 \\
+        Linear Search & 5K images & 375000 & 31500 \\
+        Linear Search & 25K images & 1875000 & 157500 \\
+        Hash Search & 5K images & 902500 & 500 \\
+        Hash Search & 25K images & 4512500 & 2500 \\
+        Hash Dynamic & 5K images & 910000 & 5500 \\
+        Hash Dynamic & 25K images & 4550000 & 27500 \\
+        Octree Search & 5K images & 1137500 & 44000 \\
+        Octree Search & 25K images & 5687500 & 220000 \\
+        Quadtree Search & 5K images & 1175000 & 37000 \\
+        Quadtree Search & 25K images & 5875000 & 185000 \\
         \hline
     \end{tabularx}
     \vspace{0.2cm}
     \begin{minipage}{\columnwidth}
     \footnotesize
-    \textit{Note: Execution times measured in microseconds (μs) on standardized hardware; \\actual performance depends on specific implementation and system architecture.}
+    \textit{Note: Execution times measured in nanoseconds (ns) on standardized hardware; \\actual performance depends on specific implementation and system architecture.}
     \end{minipage}
 \end{table}
 
@@ -392,7 +392,7 @@ This section details the individual contributions of each team member to the res
     
     \item \textbf{Iago Fereguetti Ribeiro:} Responsible for the Linear Search baseline implementation and the comparative analysis methodology. Contributed to the theoretical background research, literature review, and the development of performance measurement protocols. Assisted in the preparation of experimental results and statistical validation.
     
-    \item \textbf{Bernardo Ferreira Temponi:} Implemented the Hash Search algorithm with 3D spatial grid indexing, including the cell mapping and collision handling strategies. Contributed to the anti-cache strategy development and participated in the scalability analysis for large datasets. Assisted in the documentation and code organization aspects of the project.
+    \item \textbf{Bernardo Ferreira Temponi:} Implemented the basic Hash Search algorithm (spatial grid hashing), including the cell mapping and collision handling strategies. Contributed to the anti-cache strategy development and participated in the scalability analysis for large datasets. Assisted in the documentation and code organization aspects of the project.
     
     \item \textbf{[Nome Randomico]:} Additional team member contributing to various aspects of the research implementation and analysis, including support for experimental validation and results interpretation.
 \end{itemize}
