@@ -1164,8 +1164,8 @@ BenchmarkResult benchmarkStructure(std::unique_ptr<ImageDatabase> db,
     auto results = db->findSimilar(query, threshold);
     auto searchEnd = std::chrono::high_resolution_clock::now();
     
-    double insertTime = std::chrono::duration<double, std::milli>(insertEnd - start).count();
-    double searchTime = std::chrono::duration<double, std::milli>(searchEnd - insertEnd).count();
+    double insertTime = std::chrono::duration<double, std::micro>(insertEnd - start).count();
+    double searchTime = std::chrono::duration<double, std::micro>(searchEnd - insertEnd).count();
     
     // Calcular precisao baseada no Linear Search como ground truth
     double precision = (results.size() > 0) ? 100.0 : 0.0;  // Simplificado por enquanto
@@ -1215,7 +1215,7 @@ int main() {
             allResults.push_back(result);
             
             // Mostrar resultado imediatamente no estilo dos benchmarks de imagem
-            printf("  %s: Insert=%.3fms, Search=%.3fms, Found=%d\n", 
+            printf("  %s: Insert=%.1fμs, Search=%.1fμs, Found=%d\n", 
                    result.structureName.c_str(), result.insertTime, result.searchTime, result.resultsFound);
             
             // Dataset sai de escopo aqui e libera memoria automaticamente
@@ -1227,7 +1227,7 @@ int main() {
     printf("RESULTADOS FINAIS - TABELA ORGANIZADA\n");
     printf("==================================================================================\n\n");
     
-    printf("Dataset        Estrutura               Insert(ms)       Search(ms)       Found\n");
+    printf("Dataset        Estrutura               Insert(μs)       Search(μs)       Found\n");
     printf("-------------------------------------------------------------------------------\n");
     
     // Organizar resultados por escala
@@ -1244,12 +1244,12 @@ int main() {
                 (scale == 5000 && result.insertTime >= 1.5)) {
                     
                 if (firstForScale) {
-                    printf("%-14d %-23s %12.3f %12.3f %12d\n", 
+                    printf("%-14d %-23s %12.1f %12.1f %12d\n", 
                            scale, result.structureName.c_str(), 
                            result.insertTime, result.searchTime, result.resultsFound);
                     firstForScale = false;
                 } else {
-                    printf("%-14s %-23s %12.3f %12.3f %12d\n", 
+                    printf("%-14s %-23s %12.1f %12.1f %12d\n", 
                            "", result.structureName.c_str(),
                            result.insertTime, result.searchTime, result.resultsFound);
                 }
@@ -1289,7 +1289,7 @@ int main() {
             }
         }
         
-        printf("%-14d | Insert: %-20s (%.3fms) | Search: %-20s (%.3fms)\n",
+        printf("%-14d | Insert: %-20s (%.1fμs) | Search: %-20s (%.1fμs)\n",
                scale, bestInsert.c_str(), bestInsertTime, bestSearch.c_str(), bestSearchTime);
     }
     
