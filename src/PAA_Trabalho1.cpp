@@ -832,6 +832,143 @@ public:
 };
 
 // ============================================================================
+// ESTRUTURA 5: HASH DYNAMIC SEARCH (EXPANSÃO ADAPTATIVA)
+// ============================================================================
+/*
+ANÁLISE PAA - HASH DYNAMIC SEARCH:
+
+CONCEITO:
+- Hash table com expansão dinâmica do raio de busca
+- Busca por "camadas" concêntricas (cubo por cubo)
+- Otimização: para busca quando encontrar resultados suficientes
+
+TÉCNICA DE BUSCA ADAPTATIVA:
+- Inicia na célula central (query point)
+- Expande em cubos concêntricos de raio crescente
+- Para quando threshold é atingido ou não há mais células
+
+VANTAGENS:
+- Busca otimizada: examina células mais próximas primeiro
+- Controle fino: pode parar antecipadamente
+- Flexibilidade: adapta-se à distribuição de dados
+
+COMPLEXIDADES:
+- Inserção: O(1) - idêntica ao hash básico
+- Busca: O(r³ × densidade) onde r = raio em células
+- Espaço: O(n + m) onde m = células ativas
+
+QUANDO USAR:
+- Quando precisão é mais importante que velocidade
+- Datasets com distribuição irregular
+- Consultas com thresholds variáveis
+*/
+
+class HashDynamicSearch : public ImageDatabase {
+private:
+    double cellSize;
+    std::unordered_map<std::string, std::vector<Image>> grid;
+    
+    int rgbToCell(double value) const {
+        return static_cast<int>(value / cellSize);
+    }
+    
+    std::string getCellKey(int r_cell, int g_cell, int b_cell) const {
+        static char buffer[64];
+        snprintf(buffer, sizeof(buffer), "%d,%d,%d", r_cell, g_cell, b_cell);
+        return std::string(buffer);
+    }
+    
+    // BUSCA POR EXPANSÃO DE CUBO: examina camadas concêntricas
+    void searchCubeAtRadius(int center_r, int center_g, int center_b, int radius,
+                           const Image& query, double threshold, std::vector<Image>& results) {
+        if (radius == 0) {
+            // Célula central
+            searchSingleCell(center_r, center_g, center_b, query, threshold, results);
+            return;
+        }
+        
+        // TÉCNICA PAA: Busca apenas na "casca" do cubo de raio r
+        // Evita reprocessar células já examinadas em raios menores
+        for (int dr = -radius; dr <= radius; dr++) {
+            for (int dg = -radius; dg <= radius; dg++) {
+                for (int db = -radius; db <= radius; db++) {
+                    // Só processar se está na casca externa (pelo menos uma coordenada no limite)
+                    if (abs(dr) == radius || abs(dg) == radius || abs(db) == radius) {
+                        searchSingleCell(center_r + dr, center_g + dg, center_b + db,
+                                       query, threshold, results);
+                    }
+                }
+            }
+        }
+    }
+    
+    void searchSingleCell(int r_cell, int g_cell, int b_cell,
+                         const Image& query, double threshold, std::vector<Image>& results) {
+        std::string key = getCellKey(r_cell, g_cell, b_cell);
+        
+        auto it = grid.find(key);
+        if (it != grid.end()) {
+            for (const auto& img : it->second) {
+                double distance = query.distanceTo(img);
+                if (distance <= threshold) {
+                    results.push_back(img);
+                }
+            }
+        }
+    }
+
+public:
+    HashDynamicSearch(double _cellSize = 25.0) : cellSize(_cellSize) {}
+    
+    void insert(const Image& img) override {
+        std::string key = getCellKey(rgbToCell(img.r), rgbToCell(img.g), rgbToCell(img.b));
+        grid[key].push_back(img);
+    }
+    
+    std::vector<Image> findSimilar(const Image& query, double threshold) override {
+        std::vector<Image> results;
+        
+        int query_r = rgbToCell(query.r);
+        int query_g = rgbToCell(query.g);  
+        int query_b = rgbToCell(query.b);
+        
+        // BUSCA DINÂMICA: expande em camadas até cobrir o threshold
+        int max_radius = static_cast<int>(ceil(threshold / cellSize));
+        
+        for (int radius = 0; radius <= max_radius; radius++) {
+            searchCubeAtRadius(query_r, query_g, query_b, radius, query, threshold, results);
+        }
+        
+        // Ordenar por distância (nearest-first)
+        std::sort(results.begin(), results.end(),
+                 [&query](const Image& a, const Image& b) {
+                     return query.distanceTo(a) < query.distanceTo(b);
+                 });
+        
+        return results;
+    }
+    
+    std::string getName() const override {
+        return "Hash Dynamic Search (cell=" + std::to_string(cellSize) + ", adaptive)";
+    }
+    
+    void printAnalysis() const {
+        std::cout << "  ANÁLISE HASH DYNAMIC SEARCH:" << std::endl;
+        std::cout << "    Células ativas: " << grid.size() << std::endl;
+        std::cout << "    Tamanho da célula: " << cellSize << std::endl;
+        std::cout << "    Estratégia: Expansão em camadas concêntricas" << std::endl;
+        
+        if (!grid.empty()) {
+            size_t totalImages = 0;
+            for (const auto& pair : grid) {
+                totalImages += pair.second.size();
+            }
+            std::cout << "    Densidade média: " << (static_cast<double>(totalImages) / grid.size()) << " imagens/célula" << std::endl;
+        }
+    }
+};
+
+// ============================================================================
 // GERAÇÃO DE DADOS SINTÉTICOS PARA BENCHMARKING
 // ============================================================================
 /*
@@ -961,6 +1098,9 @@ void experimentalAnalysis(ImageDatabase& db, const std::vector<Image>& dataset,
     if (auto* hashDB = dynamic_cast<HashSearch*>(&db)) {
         std::cout << "\nFASE 4: Análise Estrutural" << std::endl;
         hashDB->printAnalysis();
+    } else if (auto* hashDynamicDB = dynamic_cast<HashDynamicSearch*>(&db)) {
+        std::cout << "\nFASE 4: Análise Estrutural" << std::endl;
+        hashDynamicDB->printAnalysis();
     } else if (auto* octreeDB = dynamic_cast<OctreeSearch*>(&db)) {
         std::cout << "\nFASE 4: Análise Estrutural" << std::endl;
         octreeDB->printAnalysis();
@@ -971,13 +1111,172 @@ void experimentalAnalysis(ImageDatabase& db, const std::vector<Image>& dataset,
 }
 
 // ============================================================================
-// PROGRAMA PRINCIPAL - COMPARAÇÃO EXPERIMENTAL DAS 4 ESTRUTURAS
+// ESTRUTURA 5: HASH DYNAMIC SEARCH (EXPANSÃO ADAPTATIVA)
 // ============================================================================
+/*
+ANÁLISE PAA - HASH DYNAMIC SEARCH:
+
+CONCEITO:
+- Hash table com expansão dinâmica do raio de busca
+- Busca por "camadas" concêntricas (cubo por cubo)
+- Otimização: para busca quando encontrar resultados suficientes
+
+TÉCNICA DE BUSCA ADAPTATIVA:
+- Inicia na célula central (query point)
+- Expande em cubos concêntricos de raio crescente
+- Para quando threshold é atingido ou não há mais células
+
+VANTAGENS:
+- Busca otimizada: examina células mais próximas primeiro
+- Controle fino: pode parar antecipadamente
+- Flexibilidade: adapta-se à distribuição de dados
+
+COMPLEXIDADES:
+- Inserção: O(1) - idêntica ao hash básico
+- Busca: O(r³ × densidade) onde r = raio em células
+- Espaço: O(n + m) onde m = células ativas
+
+QUANDO USAR:
+- Quando precisão é mais importante que velocidade
+- Datasets com distribuição irregular
+- Consultas com thresholds variáveis
+*/
+
+class HashDynamicSearch : public ImageDatabase {
+private:
+    double cellSize;
+    std::unordered_map<std::string, std::vector<Image>> grid;
+    
+    int rgbToCell(double value) const {
+        return static_cast<int>(value / cellSize);
+    }
+    
+    std::string getCellKey(int r_cell, int g_cell, int b_cell) const {
+        static char buffer[64];
+        snprintf(buffer, sizeof(buffer), "%d,%d,%d", r_cell, g_cell, b_cell);
+        return std::string(buffer);
+    }
+    
+    // BUSCA POR EXPANSÃO DE CUBO: examina camadas concêntricas
+    void searchCubeAtRadius(int center_r, int center_g, int center_b, int radius,
+                           const Image& query, double threshold, std::vector<Image>& results) {
+        if (radius == 0) {
+            // Célula central
+            searchSingleCell(center_r, center_g, center_b, query, threshold, results);
+            return;
+        }
+        
+        // TÉCNICA PAA: Busca apenas na "casca" do cubo de raio r
+        // Evita reprocessar células já examinadas em raios menores
+        for (int dr = -radius; dr <= radius; dr++) {
+            for (int dg = -radius; dg <= radius; dg++) {
+                for (int db = -radius; db <= radius; db++) {
+                    // Só processar se está na casca externa (pelo menos uma coordenada no limite)
+                    if (abs(dr) == radius || abs(dg) == radius || abs(db) == radius) {
+                        searchSingleCell(center_r + dr, center_g + dg, center_b + db,
+                                       query, threshold, results);
+                    }
+                }
+            }
+        }
+    }
+    
+    void searchSingleCell(int r_cell, int g_cell, int b_cell,
+                         const Image& query, double threshold, std::vector<Image>& results) {
+        std::string key = getCellKey(r_cell, g_cell, b_cell);
+        
+        auto it = grid.find(key);
+        if (it != grid.end()) {
+            for (const auto& img : it->second) {
+                double distance = query.distanceTo(img);
+                if (distance <= threshold) {
+                    results.push_back(img);
+                }
+            }
+        }
+    }
+
+public:
+    HashDynamicSearch(double _cellSize = 25.0) : cellSize(_cellSize) {}
+    
+    void insert(const Image& img) override {
+        std::string key = getCellKey(rgbToCell(img.r), rgbToCell(img.g), rgbToCell(img.b));
+        grid[key].push_back(img);
+    }
+    
+    std::vector<Image> findSimilar(const Image& query, double threshold) override {
+        std::vector<Image> results;
+        
+        int query_r = rgbToCell(query.r);
+        int query_g = rgbToCell(query.g);  
+        int query_b = rgbToCell(query.b);
+        
+        // BUSCA DINÂMICA: expande em camadas até cobrir o threshold
+        int max_radius = static_cast<int>(ceil(threshold / cellSize));
+        
+        for (int radius = 0; radius <= max_radius; radius++) {
+            searchCubeAtRadius(query_r, query_g, query_b, radius, query, threshold, results);
+        }
+        
+        // Ordenar por distância (nearest-first)
+        std::sort(results.begin(), results.end(),
+                 [&query](const Image& a, const Image& b) {
+                     return query.distanceTo(a) < query.distanceTo(b);
+                 });
+        
+        return results;
+    }
+    
+    std::string getName() const override {
+        return "Hash Dynamic Search (cell=" + std::to_string(cellSize) + ", adaptive)";
+    }
+    
+    void printAnalysis() const {
+        std::cout << "  ANÁLISE HASH DYNAMIC SEARCH:" << std::endl;
+        std::cout << "    Células ativas: " << grid.size() << std::endl;
+        std::cout << "    Tamanho da célula: " << cellSize << std::endl;
+        std::cout << "    Estratégia: Expansão em camadas concêntricas" << std::endl;
+        
+        if (!grid.empty()) {
+            size_t totalImages = 0;
+            for (const auto& pair : grid) {
+                totalImages += pair.second.size();
+            }
+            std::cout << "    Densidade média: " << (static_cast<double>(totalImages) / grid.size()) << " imagens/célula" << std::endl;
+        }
+    }
+};
+
+// ============================================================================
+// PROGRAMA PRINCIPAL - COMPARAÇÃO EXPERIMENTAL DAS 5 ESTRUTURAS
+// ============================================================================
+/*
+METODOLOGIA OTIMIZADA PAA: CREATE -> TEST -> DESTROY Pattern
+
+MOTIVAÇÃO:
+- Evita manter todas as estruturas na memória simultaneamente
+- Reduz picos de consumo de RAM
+- Permite teste com datasets maiores
+- Isolamento: crash em uma estrutura não afeta outras
+
+IMPLEMENTAÇÃO:
+1. Para cada estrutura:
+   a) Criar instância única
+   b) Executar teste completo
+   c) Destruir automaticamente (RAII)
+2. Repetir para próxima estrutura
+
+BENEFÍCIOS:
+- Menor uso de memória
+- Melhor estabilidade
+- Testes mais confiáveis
+*/
 
 int main() {
     std::cout << std::string(80, '=') << std::endl;
     std::cout << "PROJETO DE ANÁLISE DE ALGORITMOS (PAA)" << std::endl;
     std::cout << "COMPARAÇÃO DE ESTRUTURAS DE DADOS PARA BUSCA POR SIMILARIDADE" << std::endl;
+    std::cout << "Padrão CREATE->TEST->DESTROY para Otimização de Memória" << std::endl;
     std::cout << std::string(80, '=') << std::endl;
     
     // CONFIGURAÇÃO EXPERIMENTAL
@@ -993,34 +1292,46 @@ int main() {
               << QUERY_POINT.g << ", " << QUERY_POINT.b << ")" << std::endl;
     std::cout << "  Threshold: " << QUERY_THRESHOLD << std::endl;
     std::cout << "  Métrica: Distância euclidiana" << std::endl;
+    std::cout << "  Padrão: CREATE->TEST->DESTROY (uma estrutura por vez)" << std::endl;
     
     // Geração do dataset sintético
     std::cout << "\nGerando dataset sintético..." << std::endl;
     std::vector<Image> syntheticDataset = generateSyntheticDataset(DATASET_SIZE);
     std::cout << "Dataset gerado: " << syntheticDataset.size() << " imagens" << std::endl;
     
-    // ESTRUTURA 1: Busca Linear (Baseline)
-    {
-        LinearSearch linearDB;
-        experimentalAnalysis(linearDB, syntheticDataset, QUERY_POINT, QUERY_THRESHOLD);
-    }
+    // Lista de estruturas para teste sequencial
+    std::vector<std::string> structureNames = {
+        "LinearSearch", "HashSearch", "HashDynamicSearch", "OctreeSearch", "QuadtreeSearch"
+    };
     
-    // ESTRUTURA 2: Hash Table Espacial
-    {
-        HashSearch hashDB(25.0);  // Cell size otimizado
-        experimentalAnalysis(hashDB, syntheticDataset, QUERY_POINT, QUERY_THRESHOLD);
-    }
-    
-    // ESTRUTURA 3: Octree 3D
-    {
-        OctreeSearch octreeDB(15);  // Max 15 imagens por nó
-        experimentalAnalysis(octreeDB, syntheticDataset, QUERY_POINT, QUERY_THRESHOLD);
-    }
-    
-    // ESTRUTURA 4: Quadtree 2D Iterativo
-    {
-        QuadtreeIterativeSearch quadtreeDB(30);  // Max 30 imagens por nó
-        experimentalAnalysis(quadtreeDB, syntheticDataset, QUERY_POINT, QUERY_THRESHOLD);
+    // PADRÃO CREATE->TEST->DESTROY: Uma estrutura por vez
+    for (const std::string& structName : structureNames) {
+        std::cout << "\n" << std::string(60, '-') << std::endl;
+        std::cout << "TESTANDO: " << structName << std::endl;
+        std::cout << std::string(60, '-') << std::endl;
+        
+        // CREATE: Instantiar apenas a estrutura atual
+        std::unique_ptr<ImageDatabase> db;
+        
+        if (structName == "LinearSearch") {
+            db = std::make_unique<LinearSearch>();
+        } else if (structName == "HashSearch") {
+            db = std::make_unique<HashSearch>(25.0);  // Cell size otimizado
+        } else if (structName == "HashDynamicSearch") {
+            db = std::make_unique<HashDynamicSearch>(25.0);  // Cell size otimizado
+        } else if (structName == "OctreeSearch") {
+            db = std::make_unique<OctreeSearch>(15);  // Max 15 imagens por nó
+        } else if (structName == "QuadtreeSearch") {
+            db = std::make_unique<QuadtreeIterativeSearch>(30);  // Max 30 imagens por nó
+        }
+        
+        // TEST: Executar análise completa na estrutura atual
+        if (db) {
+            experimentalAnalysis(*db, syntheticDataset, QUERY_POINT, QUERY_THRESHOLD);
+        }
+        
+        // DESTROY: Automático quando db sai de escopo (RAII)
+        // Memória é liberada antes de criar próxima estrutura
     }
     
     // ANÁLISE TEÓRICA COMPARATIVA
@@ -1040,13 +1351,19 @@ int main() {
     std::cout << "   ├─ Espaço: O(n + m) onde m = número de células" << std::endl;
     std::cout << "   └─ Uso: Distribuição uniforme, busca rápida" << std::endl;
     
-    std::cout << "\n3. OCTREE 3D (Árvore Espacial):" << std::endl;
+    std::cout << "\n3. HASH DYNAMIC SEARCH (Expansão Adaptativa):" << std::endl;
+    std::cout << "   ├─ Inserção: O(1) - idêntica ao hash básico" << std::endl;
+    std::cout << "   ├─ Busca: O(r³ × densidade) onde r = raio em células" << std::endl;
+    std::cout << "   ├─ Espaço: O(n + m) onde m = células ativas" << std::endl;
+    std::cout << "   └─ Uso: Precisão prioritária, thresholds variáveis" << std::endl;
+    
+    std::cout << "\n4. OCTREE 3D (Árvore Espacial):" << std::endl;
     std::cout << "   ├─ Inserção: O(log n) esperado, O(h) onde h = altura" << std::endl;
     std::cout << "   ├─ Busca: O(log n + k) com poda geométrica eficiente" << std::endl;
     std::cout << "   ├─ Espaço: O(n + nós internos)" << std::endl;
     std::cout << "   └─ Uso: Datasets grandes, distribuição não-uniforme" << std::endl;
     
-    std::cout << "\n4. QUADTREE 2D (Projeção Espacial):" << std::endl;
+    std::cout << "\n5. QUADTREE 2D (Projeção Espacial):" << std::endl;
     std::cout << "   ├─ Inserção: O(log n) esperado no espaço 2D" << std::endl;
     std::cout << "   ├─ Busca: O(log n + k) com poda menos eficiente" << std::endl;
     std::cout << "   ├─ Espaço: O(n + nós internos), menor overhead" << std::endl;
@@ -1068,6 +1385,7 @@ int main() {
     std::cout << "\nRECOMENDAÇÕES GERAIS:" << std::endl;
     std::cout << "• n < 1K: Linear Search (simplicidade)" << std::endl;
     std::cout << "• 1K < n < 10K: Hash Table (performance balanceada)" << std::endl;
+    std::cout << "• Precisão crítica: Hash Dynamic (busca adaptativa)" << std::endl;
     std::cout << "• 10K < n < 100K: Octree (poda eficiente)" << std::endl;
     std::cout << "• n > 100K: Quadtree (curse of dimensionality)" << std::endl;
     
