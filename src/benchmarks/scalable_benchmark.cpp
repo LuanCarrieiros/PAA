@@ -448,7 +448,7 @@ std::vector<Image> generateSyntheticDataset(int count) {
     images.reserve(count);
     
     // SEED FIXA para consistencia entre execucoes
-    std::mt19937 gen(20);  // Sempre os mesmos dados sinteticos
+    std::mt19937 gen(42);  // Sempre os mesmos dados sinteticos
     std::uniform_real_distribution<> colorDist(0.0, 255.0);
     
     for (int i = 0; i < count; ++i) {
