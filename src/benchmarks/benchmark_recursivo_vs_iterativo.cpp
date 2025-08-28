@@ -3,14 +3,14 @@
 BENCHMARK RECURSIVO vs ITERATIVO - PAA Assignment 1
 =============================================================================
 
-Testa apenas estruturas de árvores espaciais em 4 versões:
-1. Quadtree Recursivo (inserção + busca)
-2. Quadtree Iterativo (inserção + busca)  
-3. Octree Recursivo (inserção + busca)
-4. Octree Iterativo (inserção + busca)
+Testa apenas estruturas de arvores espaciais em 4 versoes:
+1. Quadtree Recursivo (insercao + busca)
+2. Quadtree Iterativo (insercao + busca)  
+3. Octree Recursivo (insercao + busca)
+4. Octree Iterativo (insercao + busca)
 
-Escalas: 100 → 50M imagens sintéticas
-Objetivo: Provar que Recursão > Iteração para árvores espaciais
+Escalas: 100 → 50M imagens sinteticas
+Objetivo: Provar que Recursao > Iteracao para arvores espaciais
 
 =============================================================================
 */
@@ -432,7 +432,7 @@ std::vector<Image> generateSyntheticDataset(int count) {
     std::vector<Image> images;
     images.reserve(count);
     
-    // SEED FIXA para consistência entre execuções
+    // SEED FIXA para consistencia entre execucoes
     std::mt19937 gen(42);
     std::uniform_real_distribution<> colorDist(0.0, 255.0);
     
@@ -465,7 +465,7 @@ BenchmarkResult benchmarkStructure(std::unique_ptr<ImageDatabase> db,
     result.structureName = db->getName();
     result.datasetSize = dataset.size();
     
-    // Teste de Inserção
+    // Teste de Insercao
     auto startInsert = std::chrono::high_resolution_clock::now();
     for (const auto& img : dataset) {
         db->insert(img);
@@ -491,7 +491,7 @@ int main() {
     std::cout << "BENCHMARK RECURSIVO VS ITERATIVO - PAA Assignment 1\n";
     std::cout << "=============================================================================\n\n";
     
-    // Configurações
+    // Configuracoes
     const std::vector<int> scales = {100, 1000, 10000, 100000, 500000, 1000000, 5000000, 10000000, 25000000, 50000000};
     const Image queryPoint(999999, "query.jpg", 128, 128, 128);
     const double threshold = 50.0;
@@ -533,7 +533,7 @@ int main() {
     std::cout << "RESULTADOS FINAIS - RECURSAO VS ITERACAO\n";
     std::cout << "=============================================================================\n\n";
     
-    // Cabeçalho da tabela
+    // Cabecalho da tabela
     printf("%-10s %-20s %-12s %-12s %-8s\n", "Dataset", "Estrutura", "Insert(ms)", "Search(ms)", "Found");
     std::cout << "-------------------------------------------------------------------------\n";
     
@@ -557,14 +557,14 @@ int main() {
         std::cout << "-------------------------------------------------------------------------\n";
     }
     
-    // Análise de vencedores 
+    // Analise de vencedores 
     std::cout << "\nCOMPARACAO RECURSAO VS ITERACAO:\n";
     std::cout << "=============================================================================\n";
     
     for (int scale : scales) {
         std::cout << "\nEscala " << scale << ":\n";
         
-        // Encontrar tempos para comparação
+        // Encontrar tempos para comparacao
         double quadRecInsert = 0, quadIterInsert = 0, quadRecSearch = 0, quadIterSearch = 0;
         double octRecInsert = 0, octIterInsert = 0, octRecSearch = 0, octIterSearch = 0;
         
@@ -582,7 +582,7 @@ int main() {
             }
         }
         
-        // Comparações
+        // Comparacoes
         printf("  Quadtree: Rec %.3fms vs Iter %.3fms (Insert) - ", quadRecInsert, quadIterInsert);
         printf("%s vence por %.1f%%\n", 
                quadRecInsert < quadIterInsert ? "RECURSIVO" : "Iterativo",
