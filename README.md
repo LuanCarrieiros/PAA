@@ -137,8 +137,8 @@ Implementation uses RAII (Resource Acquisition Is Initialization) with smart poi
 ### Compilation and Execution
 ```bash
 # Main educational demonstration
-g++ -O2 -std=c++17 -o paa_trabalho1 src/PAA_Trabalho1.cpp
-./paa_trabalho1
+g++ -O2 -std=c++17 -o main src/main.cpp
+./main
 
 # Large-scale synthetic benchmark
 g++ -O2 -o scalable src/benchmarks/scalable_benchmark.cpp
