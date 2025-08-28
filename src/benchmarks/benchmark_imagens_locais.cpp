@@ -13,7 +13,7 @@
 #include <iomanip>
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include "../headers/stb_image.h"
 
 struct Image {
     int r, g, b;
@@ -333,6 +333,96 @@ public:
     std::string getName() const override { return "Quadtree Search"; }
 };
 
+// Dynamic Hash Search com busca por expansão de cubo  
+class HashSearchDynamic : public ImageDatabase {
+private:
+    static const int CELL_SIZE = 32;
+    std::unordered_map<std::string, std::vector<Image>> hashGrid;
+    
+    int rgbToCell(int value) {
+        return value / CELL_SIZE;
+    }
+    
+    std::string getCellKey(int r_cell, int g_cell, int b_cell) {
+        return std::to_string(r_cell) + "," + std::to_string(g_cell) + "," + std::to_string(b_cell);
+    }
+    
+    void searchCubeAtRadius(int center_r, int center_g, int center_b, int radius, 
+                           const Image& query, double threshold, std::vector<Image>& results) {
+        if (radius == 0) {
+            searchSingleCell(center_r, center_g, center_b, query, threshold, results);
+            return;
+        }
+        
+        for (int dr = -radius; dr <= radius; dr++) {
+            for (int dg = -radius; dg <= radius; dg++) {
+                for (int db = -radius; db <= radius; db++) {
+                    if (abs(dr) == radius || abs(dg) == radius || abs(db) == radius) {
+                        searchSingleCell(center_r + dr, center_g + dg, center_b + db, 
+                                       query, threshold, results);
+                    }
+                }
+            }
+        }
+    }
+    
+    void searchSingleCell(int r_cell, int g_cell, int b_cell, 
+                         const Image& query, double threshold, std::vector<Image>& results) {
+        std::string key = getCellKey(r_cell, g_cell, b_cell);
+        
+        auto it = hashGrid.find(key);
+        if (it != hashGrid.end()) {
+            for (const auto& img : it->second) {
+                double distance = query.distanceTo(img);
+                if (distance <= threshold) {
+                    results.push_back(img);
+                }
+            }
+        }
+    }
+
+public:
+    void insert(const Image& image) override {
+        int r_cell = rgbToCell(image.r);
+        int g_cell = rgbToCell(image.g);
+        int b_cell = rgbToCell(image.b);
+        std::string key = getCellKey(r_cell, g_cell, b_cell);
+        hashGrid[key].push_back(image);
+    }
+    
+    std::vector<Image> search(const Image& query, double threshold) override {
+        std::vector<Image> results;
+        
+        int query_r = rgbToCell(query.r);
+        int query_g = rgbToCell(query.g);
+        int query_b = rgbToCell(query.b);
+        
+        int max_radius = static_cast<int>(ceil(threshold / CELL_SIZE));
+        
+        // Dynamic search: expand from query cell outward
+        for (int radius = 0; radius <= max_radius; radius++) {
+            searchCubeAtRadius(query_r, query_g, query_b, radius, query, threshold, results);
+        }
+        
+        std::sort(results.begin(), results.end(), 
+                 [&query](const Image& a, const Image& b) {
+                     return query.distanceTo(a) < query.distanceTo(b);
+                 });
+        
+        return results;
+    }
+    
+    void clear() override { hashGrid.clear(); }
+    size_t size() const override {
+        size_t total = 0;
+        for (const auto& bucket : hashGrid) {
+            total += bucket.second.size();
+        }
+        return total;
+    }
+    std::string getName() const override { return "Hash Dynamic Search"; }
+};
+
 class RealImageLoader {
 private:
     std::string baseDir;
@@ -341,7 +431,7 @@ private:
 
 public:
     RealImageLoader(const std::string& dir) : baseDir(dir), rng(42) {
-        categories = {"airplane", "car", "cat", "dog", "flower", "fruit", "motorbike", "person"};
+        // No categories needed - just load all images
     }
     
     Image extractRGBFromFile(const std::string& filepath, const std::string& category) {
@@ -375,14 +465,13 @@ public:
         std::vector<Image> images;
         std::vector<std::string> allFiles;
         
-        for (const auto& category : categories) {
-            namespace fs = std::filesystem;
-            for (const auto& entry : fs::directory_iterator(baseDir)) {
-                if (entry.is_regular_file()) {
-                    std::string filename = entry.path().filename().string();
-                    if (filename.find(category) == 0 && filename.find(".jpg") != std::string::npos) {
-                        allFiles.push_back(entry.path().string() + ":" + category);
-                    }
+        // Load all .jpg and .png files
+        namespace fs = std::filesystem;
+        for (const auto& entry : fs::directory_iterator(baseDir)) {
+            if (entry.is_regular_file()) {
+                std::string filename = entry.path().filename().string();
+                if (filename.find(".jpg") != std::string::npos || filename.find(".png") != std::string::npos) {
+                    allFiles.push_back(entry.path().string() + ":image");
                 }
             }
         }
@@ -412,29 +501,26 @@ public:
     }
     
     Image getRandomQueryImage() {
-        std::uniform_int_distribution<int> categoryDist(0, categories.size() - 1);
-        std::string selectedCategory = categories[categoryDist(rng)];
-        
-        std::vector<std::string> categoryFiles;
+        std::vector<std::string> allFiles;
         namespace fs = std::filesystem;
         for (const auto& entry : fs::directory_iterator(baseDir)) {
             if (entry.is_regular_file()) {
                 std::string filename = entry.path().filename().string();
-                if (filename.find(selectedCategory) == 0 && filename.find(".jpg") != std::string::npos) {
-                    categoryFiles.push_back(entry.path().string());
+                if (filename.find(".jpg") != std::string::npos || filename.find(".png") != std::string::npos) {
+                    allFiles.push_back(entry.path().string());
                 }
             }
         }
         
-        if (categoryFiles.empty()) {
-            return Image(128, 128, 128, "fallback", selectedCategory);
+        if (allFiles.empty()) {
+            return Image(128, 128, 128, "fallback", "image");
         }
         
-        std::uniform_int_distribution<int> fileDist(0, categoryFiles.size() - 1);
-        std::string selectedFile = categoryFiles[fileDist(rng)];
+        std::uniform_int_distribution<int> fileDist(0, allFiles.size() - 1);
+        std::string selectedFile = allFiles[fileDist(rng)];
         
-        std::cout << "Query image: " << selectedFile << " (" << selectedCategory << ")" << std::endl;
-        return extractRGBFromFile(selectedFile, selectedCategory);
+        std::cout << "Query image: " << selectedFile << std::endl;
+        return extractRGBFromFile(selectedFile, "image");
     }
 };
 
@@ -465,19 +551,39 @@ BenchmarkResult benchmarkStructure(ImageDatabase* db, const std::vector<Image>& 
 }
 
 int main() {
+    const std::string imageDir = "./pokemon_jpg/";
+    const double THRESHOLD = 50.0;
+    
+    // Count total images in directory first
+    namespace fs = std::filesystem;
+    int totalImages = 0;
+    for (const auto& entry : fs::directory_iterator(imageDir)) {
+        if (entry.is_regular_file()) {
+            std::string filename = entry.path().filename().string();
+            if (filename.find(".jpg") != std::string::npos || filename.find(".png") != std::string::npos) {
+                totalImages++;
+            }
+        }
+    }
+    
+    std::cout << "Total de imagens encontradas: " << totalImages << std::endl;
+    
+    // Dynamic test sizes based on available images
+    std::vector<int> testSizes;
+    if (totalImages >= 50) testSizes.push_back(50);
+    if (totalImages >= 100) testSizes.push_back(100);
+    if (totalImages >= 300) testSizes.push_back(300);
+    if (totalImages >= 500) testSizes.push_back(500);
+    if (totalImages > 500) testSizes.push_back(totalImages); // All available images
+    
     std::cout << "==================================================================================" << std::endl;
     std::cout << " BENCHMARK IMAGENS LOCAIS - PAA Assignment 1 - DADOS REAIS" << std::endl;
     std::cout << "==================================================================================" << std::endl;
     std::cout << std::endl;
-    std::cout << "Dataset: Images/natural_images/ (6,899 imagens reais Kaggle)" << std::endl;
-    std::cout << "Categorias: airplane, car, cat, dog, flower, fruit, motorbike, person" << std::endl;
+    std::cout << "Dataset: pokemon_jpg/ (" << totalImages << " imagens)" << std::endl;
     std::cout << "Threshold: 50.0" << std::endl;
-    std::cout << "Query: Imagem real aleatória (RGB extraído da foto)" << std::endl;
+    std::cout << "Query: Imagem aleatória (RGB médio extraído da foto)" << std::endl;
     std::cout << std::endl;
-    
-    const std::string imageDir = "./Images/natural_images/";
-    const double THRESHOLD = 50.0;
-    const std::vector<int> testSizes = {50, 100, 200, 500};
     
     RealImageLoader loader(imageDir);
     
@@ -485,12 +591,12 @@ int main() {
     
     Image queryImage = loader.getRandomQueryImage();
     std::cout << "Query RGB: (" << queryImage.r << ", " << queryImage.g << ", " << queryImage.b << ")" << std::endl;
-    std::cout << "Query categoria: " << queryImage.category << std::endl;
     std::cout << std::endl;
     
     std::vector<std::unique_ptr<ImageDatabase>> structures;
     structures.push_back(std::make_unique<LinearSearch>());
     structures.push_back(std::make_unique<HashSearch>());
+    structures.push_back(std::make_unique<HashSearchDynamic>());
     structures.push_back(std::make_unique<OctreeSearch>());
     structures.push_back(std::make_unique<QuadtreeSearch>());
     
@@ -524,14 +630,15 @@ int main() {
     for (int testSize : testSizes) {
         std::cout << std::left << std::setw(15) << testSize;
         
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 5; i++) {
             auto it = std::find_if(allResults.begin(), allResults.end(),
                 [testSize, i](const BenchmarkResult& r) {
                     return r.dataset_size == testSize && 
                            ((i == 0 && r.structure_name == "Linear Search") ||
                             (i == 1 && r.structure_name == "Hash Search") ||
-                            (i == 2 && r.structure_name == "Octree Search") ||
-                            (i == 3 && r.structure_name == "Quadtree Search"));
+                            (i == 2 && r.structure_name == "Hash Dynamic Search") ||
+                            (i == 3 && r.structure_name == "Octree Search") ||
+                            (i == 4 && r.structure_name == "Quadtree Search"));
                 });
             
             if (it != allResults.end()) {
@@ -576,10 +683,10 @@ int main() {
     
     std::cout << std::endl;
     std::cout << "==================================================================================" << std::endl;
-    std::cout << "Benchmark Concluído! Análise com imagens reais do dataset Kaggle." << std::endl;
-    std::cout << "   Query: Imagem real aleatória (categoria: " << queryImage.category << ")" << std::endl;
+    std::cout << "Benchmark Concluído! Análise com imagens reais." << std::endl;
+    std::cout << "   Query: Imagem aleatória" << std::endl;
     std::cout << "   RGB extraído: (" << queryImage.r << ", " << queryImage.g << ", " << queryImage.b << ")" << std::endl;
-    std::cout << "   Dados prontos para análise comparativa com dados sintéticos." << std::endl;
+    std::cout << "   Dados prontos para análise comparativa." << std::endl;
     std::cout << "==================================================================================" << std::endl;
     
     return 0;
