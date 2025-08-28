@@ -1,12 +1,12 @@
 /*
 =============================================================================
-BENCHMARK ESCALADO - PAA Assignment 1: Testes com Múltiplas Escalas
+BENCHMARK ESCALADO - PAA Assignment 1: Testes com Multiplas Escalas
 =============================================================================
 
 Testa as 4 estruturas de dados com datasets de tamanhos crescentes:
 - 100, 1K, 10K, 100K, 500K, 1M, 5M imagens
-- Combina dados sintéticos + dados reais do CSV (50K disponíveis)
-- Mede tempos de inserção e busca para análise de escalabilidade
+- Combina dados sinteticos + dados reais do CSV (50K disponiveis)
+- Mede tempos de insercao e busca para analise de escalabilidade
 
 =============================================================================
 */
@@ -110,7 +110,7 @@ public:
         std::vector<Image> results;
         uint64_t queryKey = getHashKey(query.r, query.g, query.b);
         
-        // Buscar na célula do query e células vizinhas
+        // Buscar na celula do query e celulas vizinhas
         for (int dr = -1; dr <= 1; dr++) {
             for (int dg = -1; dg <= 1; dg++) {
                 for (int db = -1; db <= 1; db++) {
@@ -341,13 +341,13 @@ public:
 // GERADORES DE DADOS
 // ============================================================================
 
-// Gerar dataset sintético
+// Gerar dataset sintetico
 std::vector<Image> generateSyntheticDataset(int count) {
     std::vector<Image> images;
     images.reserve(count);
     
-    // SEED FIXA para consistência entre execuções
-    std::mt19937 gen(20);  // Sempre os mesmos dados sintéticos
+    // SEED FIXA para consistencia entre execucoes
+    std::mt19937 gen(20);  // Sempre os mesmos dados sinteticos
     std::uniform_real_distribution<> colorDist(0.0, 255.0);
     
     for (int i = 0; i < count; ++i) {
@@ -380,7 +380,7 @@ BenchmarkResult benchmarkStructure(std::unique_ptr<ImageDatabase> db,
     result.structureName = db->getName();
     result.datasetSize = dataset.size();
     
-    // Teste de Inserção
+    // Teste de Insercao
     auto startInsert = std::chrono::high_resolution_clock::now();
     for (const auto& img : dataset) {
         db->insert(img);
@@ -402,57 +402,61 @@ BenchmarkResult benchmarkStructure(std::unique_ptr<ImageDatabase> db,
 // MAIN - BENCHMARK ESCALADO
 // ============================================================================
 int main() {
-    std::cout << "=============================================================================\n";
-    std::cout << "BENCHMARK ESCALADO - PAA Assignment 1 - DADOS SINTETICOS\n";
-    std::cout << "=============================================================================\n\n";
+    std::cout << "==================================================================================\n";
+    std::cout << " BENCHMARK ESCALADO - PAA Assignment 1 - DADOS SINTETICOS\n";
+    std::cout << "==================================================================================\n\n";
     
-    // Configurações
+    // Configuracoes
     const std::vector<int> scales = {100, 1000, 10000, 100000, 500000, 1000000, 5000000, 10000000, 25000000, 50000000};
     const Image queryPoint(999999, "query.jpg", 128, 128, 128);
     const double threshold = 50.0;
     
-    std::cout << "Configuracao do Benchmark:\n";
-    std::cout << "   Query Point: RGB(" << queryPoint.r << ", " << queryPoint.g << ", " << queryPoint.b << ")\n";
-    std::cout << "   Threshold: " << threshold << "\n";
-    std::cout << "   Escalas: 100 -> 50M imagens (10 escalas)\n";
-    std::cout << "   Dados: SEED FIXA (20) - sempre consistentes\n\n";
+    std::cout << "Dataset: Sintetico escalado (100 → 50M imagens)\n";
+    std::cout << "Threshold: " << threshold << "\n";
+    std::cout << "Query: RGB(" << (int)queryPoint.r << ", " << (int)queryPoint.g << ", " << (int)queryPoint.b << ")\n\n";
+    
+    std::cout << "Gerando datasets sinteticos com SEED fixa para reproducibilidade...\n";
     
     // Coletar todos os resultados primeiro
     std::vector<BenchmarkResult> allResults;
     
     for (int scale : scales) {
-        std::cout << "\n[TESTANDO] Escala: " << scale << " imagens...";
+        std::cout << "\n[TESTANDO] Escala: " << scale << " imagens...\n";
+        std::cout << "Generating " << scale << " synthetic images...\n";
         
         // Testar cada estrutura COM DATASET INDEPENDENTE (minhas 16GB de ram chorou kkk, economiza RAM)
         std::vector<std::string> structureNames = {"LinearSearch", "HashSearch", "OctreeSearch", "QuadtreeSearch"};
         
         for (const std::string& structName : structureNames) {
-            // Criar nova instância da estrutura
+            // Criar nova instancia da estrutura
             std::unique_ptr<ImageDatabase> structure;
             if (structName == "LinearSearch") structure = std::make_unique<LinearSearch>();
             else if (structName == "HashSearch") structure = std::make_unique<HashSearch>();
             else if (structName == "OctreeSearch") structure = std::make_unique<OctreeSearch>();
             else if (structName == "QuadtreeSearch") structure = std::make_unique<QuadtreeSearch>();
             
-            // NOVO: Gerar dataset fresco para cada estrutura (libera memória entre testes)
+            // NOVO: Gerar dataset fresco para cada estrutura (libera memoria entre testes)
             auto freshDataset = generateSyntheticDataset(scale);
             
             auto result = benchmarkStructure(std::move(structure), freshDataset, queryPoint, threshold);
             allResults.push_back(result);
             
-            // Dataset sai de escopo aqui e libera memória automaticamente
+            // Mostrar resultado imediatamente no estilo dos benchmarks de imagem
+            printf("  %s: Insert=%.3fms, Search=%.3fms, Found=%d\n", 
+                   result.structureName.c_str(), result.insertTime, result.searchTime, result.resultsFound);
+            
+            // Dataset sai de escopo aqui e libera memoria automaticamente
         }
-        std::cout << " OK\n";
     }
     
     // Agora mostrar tabela organizada
-    std::cout << "\n=============================================================================\n";
+    std::cout << "\n==================================================================================\n";
     std::cout << "RESULTADOS FINAIS - TABELA ORGANIZADA\n";
-    std::cout << "=============================================================================\n\n";
+    std::cout << "==================================================================================\n\n";
     
-    // Cabeçalho da tabela
+    // Cabecalho da tabela
     printf("%-10s %-15s %-12s %-12s %-8s\n", "Dataset", "Estrutura", "Insert(ms)", "Search(ms)", "Found");
-    std::cout << "-----------------------------------------------------------------------\n";
+    std::cout << "-------------------------------------------------------------------------------\n";
     
     // Dados organizados por escala
     for (int scale : scales) {
@@ -471,15 +475,15 @@ int main() {
                 }
             }
         }
-        std::cout << "-----------------------------------------------------------------------\n";
+        std::cout << "-------------------------------------------------------------------------------\n";
     }
     
-    // Análise de vencedores por escala
+    // Analise de vencedores por escala
     std::cout << "\nANALISE DE VENCEDORES POR ESCALA:\n";
-    std::cout << "=============================================================================\n";
+    std::cout << "==================================================================================\n";
     
     for (int scale : scales) {
-        // Encontrar melhor inserção e busca para esta escala
+        // Encontrar melhor insercao e busca para esta escala
         double bestInsert = 999999, bestSearch = 999999;
         std::string bestInsertName, bestSearchName;
         
@@ -502,12 +506,12 @@ int main() {
     }
     
     
-    std::cout << "\n=============================================================================\n";
+    std::cout << "\n==================================================================================\n";
     std::cout << "Benchmark Concluido! Analise focada em dados sinteticos escalados.\n";
     std::cout << "   Hash Search: CAMPEA ABSOLUTA em busca!\n";
-    std::cout << "   Octree: 100% RECURSIVA (insercao + busca)\n";
-    std::cout << "   Dados prontos para analise de escalabilidade.\n";
-    std::cout << "=============================================================================\n";
+    std::cout << "   Linear Search: Impressionante em insercao!\n";
+    std::cout << "   Dados prontos para analise comparativa.\n";
+    std::cout << "==================================================================================\n";
     
     return 0;
 }
