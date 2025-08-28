@@ -138,6 +138,107 @@ public:
 };
 
 // ============================================================================
+// HASH DYNAMIC SEARCH - Hash espacial com expansão adaptativa
+// ============================================================================
+class HashDynamicSearch : public ImageDatabase {
+private:
+    double cellSize;
+    std::unordered_map<std::string, std::vector<Image>> grid;
+    
+    int rgbToCell(double value) const {
+        return static_cast<int>(value / cellSize);
+    }
+    
+    std::string getCellKey(int r_cell, int g_cell, int b_cell) const {
+        static char buffer[64];
+        snprintf(buffer, sizeof(buffer), "%d,%d,%d", r_cell, g_cell, b_cell);
+        return std::string(buffer);
+    }
+    
+    // BUSCA POR EXPANSÃO DE CUBO: examina camadas concêntricas
+    void searchCubeAtRadius(int center_r, int center_g, int center_b, int radius,
+                           const Image& query, double threshold, std::vector<Image>& results) const {
+        if (radius == 0) {
+            // Célula central
+            searchSingleCell(center_r, center_g, center_b, query, threshold, results);
+            return;
+        }
+        
+        // TÉCNICA PAA: Busca apenas na "casca" do cubo de raio r
+        // Evita reprocessar células já examinadas em raios menores
+        for (int dr = -radius; dr <= radius; dr++) {
+            for (int dg = -radius; dg <= radius; dg++) {
+                for (int db = -radius; db <= radius; db++) {
+                    // Só processar se está na casca externa (pelo menos uma coordenada no limite)
+                    if (abs(dr) == radius || abs(dg) == radius || abs(db) == radius) {
+                        searchSingleCell(center_r + dr, center_g + dg, center_b + db,
+                                       query, threshold, results);
+                    }
+                }
+            }
+        }
+    }
+    
+    void searchSingleCell(int r_cell, int g_cell, int b_cell,
+                         const Image& query, double threshold, std::vector<Image>& results) const {
+        std::string key = getCellKey(r_cell, g_cell, b_cell);
+        
+        auto it = grid.find(key);
+        if (it != grid.end()) {
+            for (const auto& img : it->second) {
+                double distance = query.distanceTo(img);
+                if (distance <= threshold) {
+                    results.push_back(img);
+                }
+            }
+        }
+    }
+
+public:
+    HashDynamicSearch(double _cellSize = 25.0) : cellSize(_cellSize) {}
+    
+    void insert(const Image& img) override {
+        std::string key = getCellKey(rgbToCell(img.r), rgbToCell(img.g), rgbToCell(img.b));
+        grid[key].push_back(img);
+    }
+    
+    std::vector<Image> findSimilar(const Image& query, double threshold) const override {
+        std::vector<Image> results;
+        
+        int query_r = rgbToCell(query.r);
+        int query_g = rgbToCell(query.g);  
+        int query_b = rgbToCell(query.b);
+        
+        // BUSCA DINÂMICA: expande em camadas até cobrir o threshold
+        int max_radius = static_cast<int>(ceil(threshold / cellSize));
+        
+        for (int radius = 0; radius <= max_radius; radius++) {
+            searchCubeAtRadius(query_r, query_g, query_b, radius, query, threshold, results);
+        }
+        
+        // Ordenar por distância (nearest-first)
+        std::sort(results.begin(), results.end(),
+                 [&query](const Image& a, const Image& b) {
+                     return query.distanceTo(a) < query.distanceTo(b);
+                 });
+        
+        return results;
+    }
+    
+    size_t size() const override { 
+        size_t count = 0;
+        for (const auto& pair : grid) {
+            count += pair.second.size();
+        }
+        return count;
+    }
+    
+    std::string getName() const override {
+        return "Hash Dynamic Search (cell=" + std::to_string(cellSize) + ", adaptive)";
+    }
+};
+
+// ============================================================================
 // 3. OCTREE NODE
 // ============================================================================
 struct OctreeNode {
@@ -411,7 +512,7 @@ int main() {
     const Image queryPoint(999999, "query.jpg", 128, 128, 128);
     const double threshold = 50.0;
     
-    std::cout << "Dataset: Sintetico escalado (100 → 50M imagens)\n";
+    std::cout << "Dataset: Sintetico escalado (100 -> 50M imagens)\n";
     std::cout << "Threshold: " << threshold << "\n";
     std::cout << "Query: RGB(" << (int)queryPoint.r << ", " << (int)queryPoint.g << ", " << (int)queryPoint.b << ")\n\n";
     
@@ -425,13 +526,14 @@ int main() {
         std::cout << "Generating " << scale << " synthetic images...\n";
         
         // Testar cada estrutura COM DATASET INDEPENDENTE (minhas 16GB de ram chorou kkk, economiza RAM)
-        std::vector<std::string> structureNames = {"LinearSearch", "HashSearch", "OctreeSearch", "QuadtreeSearch"};
+        std::vector<std::string> structureNames = {"LinearSearch", "HashSearch", "HashDynamicSearch", "OctreeSearch", "QuadtreeSearch"};
         
         for (const std::string& structName : structureNames) {
             // Criar nova instancia da estrutura
             std::unique_ptr<ImageDatabase> structure;
             if (structName == "LinearSearch") structure = std::make_unique<LinearSearch>();
             else if (structName == "HashSearch") structure = std::make_unique<HashSearch>();
+            else if (structName == "HashDynamicSearch") structure = std::make_unique<HashDynamicSearch>();
             else if (structName == "OctreeSearch") structure = std::make_unique<OctreeSearch>();
             else if (structName == "QuadtreeSearch") structure = std::make_unique<QuadtreeSearch>();
             
