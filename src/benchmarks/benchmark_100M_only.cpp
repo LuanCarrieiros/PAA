@@ -450,14 +450,14 @@ BenchmarkResult benchmarkStructure(std::unique_ptr<ImageDatabase> structure,
     }
     
     auto end = std::chrono::high_resolution_clock::now();
-    result.insertTime = std::chrono::duration<double, std::micro>(end - start).count();
+    result.insertTime = std::chrono::duration<double, std::nano>(end - start).count();
     
     // Teste de Busca
     start = std::chrono::high_resolution_clock::now();
     auto results = structure->findSimilar(query, threshold);
     end = std::chrono::high_resolution_clock::now();
     
-    result.searchTime = std::chrono::duration<double, std::micro>(end - start).count();
+    result.searchTime = std::chrono::duration<double, std::nano>(end - start).count();
     result.resultsFound = results.size();
     
     return result;
@@ -504,7 +504,7 @@ int main() {
         allResults.push_back(result);
         
         // Mostrar resultado imediatamente no estilo dos benchmarks de imagem
-        printf("  %s: Insert=%.1fμs, Search=%.1fμs, Found=%d\n", 
+        printf("  %s: Insert=%.0fns, Search=%.0fns, Found=%d\n", 
                result.structureName.c_str(), result.insertTime, result.searchTime, result.resultsFound);
         
         // Dataset sai de escopo aqui e libera memória automaticamente
@@ -516,7 +516,7 @@ int main() {
     std::cout << "==================================================================================\n\n";
     
     // Cabeçalho da tabela
-    printf("%-15s %-12s %-12s %-8s\n", "Estrutura", "Insert(μs)", "Search(μs)", "Found");
+    printf("%-15s %-12s %-12s %-8s\n", "Estrutura", "Insert(ns)", "Search(ns)", "Found");
     std::cout << "-------------------------------------------------------------------------------\n";
     
     // Dados organizados
@@ -545,7 +545,7 @@ int main() {
         }
     }
     
-    printf("100M           | Insert: %-15s (%.1fμs) | Search: %-15s (%.1fμs)\n", 
+    printf("100M           | Insert: %-15s (%.0fns) | Search: %-15s (%.0fns)\n", 
            bestInsertName.c_str(), bestInsert, 
            bestSearchName.c_str(), bestSearch);
     
