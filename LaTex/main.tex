@@ -229,24 +229,33 @@ Table~\ref{tab:synthetic_performance} presents performance results for \textbf{s
 \begin{table}[H]
     \footnotesize 
     \centering
-    \caption{Performance Comparison on Synthetic Datasets (Insertion/Search times in seconds)}
+    \caption{Performance Comparison on Synthetic Datasets (times in seconds)}
     \label{tab:synthetic_performance}
-    \setlength{\tabcolsep}{3pt}
-    \begin{tabularx}{\columnwidth}{|l|c|c|c|c|c|}
+    \setlength{\tabcolsep}{4pt}
+    \begin{tabularx}{\columnwidth}{|l|c|c|c|c|c|c|}
         \hline
-        \textbf{Scale} & \textbf{Linear} & \textbf{Hash} & \textbf{Hash Dynamic} & \textbf{Octree} & \textbf{Quadtree} \\
+        \textbf{Algorithm} & \textbf{Operation} & \textbf{1K} & \textbf{10K} & \textbf{100K} & \textbf{1M} & \textbf{50M} \\
         \hline
-        1K & 0.000082/0.000005 & \textbf{0.000163/0.000001} & 0.000165/0.000002 & 0.000227/0.000013 & 0.000148/0.000011 \\
-        10K & \textbf{0.000750}/0.000063 & 0.001811/\textbf{0.000001} & 0.001820/0.000011 & 0.002270/0.000088 & 0.002348/0.000074 \\
-        100K & \textbf{0.006782}/0.000542 & 0.019542/\textbf{0.000031} & 0.019680/0.000098 & 0.028430/0.000980 & 0.030286/0.000917 \\
-        1M & \textbf{0.066646}/0.007045 & 0.173945/\textbf{0.000187} & 0.174220/0.000445 & 0.477827/0.020957 & 0.365093/0.015751 \\
-        50M & \textbf{5.752689}/0.520698 & 42.529801/\textbf{0.017987} & 42.847132/0.089441 & 82.092444/2.603842 & 72.793606/1.759648 \\
+        \multirow{2}{*}{Linear Search} & Insert & \textbf{0.000082} & \textbf{0.000750} & \textbf{0.006782} & \textbf{0.066646} & \textbf{5.752689} \\
+        & Search & 0.000005 & 0.000063 & 0.000542 & 0.007045 & 0.520698 \\
+        \hline
+        \multirow{2}{*}{Hash Search} & Insert & 0.000163 & 0.001811 & 0.019542 & 0.173945 & 42.529801 \\
+        & Search & \textbf{0.000001} & \textbf{0.000001} & \textbf{0.000031} & \textbf{0.000187} & \textbf{0.017987} \\
+        \hline
+        \multirow{2}{*}{Hash Dynamic} & Insert & 0.000165 & 0.001820 & 0.019680 & 0.174220 & 42.847132 \\
+        & Search & 0.000002 & 0.000011 & 0.000098 & 0.000445 & 0.089441 \\
+        \hline
+        \multirow{2}{*}{Octree Search} & Insert & 0.000227 & 0.002270 & 0.028430 & 0.477827 & 82.092444 \\
+        & Search & 0.000013 & 0.000088 & 0.000980 & 0.020957 & 2.603842 \\
+        \hline
+        \multirow{2}{*}{Quadtree Search} & Insert & 0.000148 & 0.002348 & 0.030286 & 0.365093 & 72.793606 \\
+        & Search & 0.000011 & 0.000074 & 0.000917 & 0.015751 & 1.759648 \\
         \hline
     \end{tabularx}
     \vspace{0.2cm}
     \begin{minipage}{\columnwidth}
     \footnotesize
-    \textit{Format: Insertion time / Search time in seconds (s). Bold indicates best performance in category.}
+    \textit{Bold values indicate best performance in each category (Insert/Search) per scale.}
     \end{minipage}
 \end{table}
 
@@ -265,22 +274,25 @@ Real-world performance evaluation on 7,721 natural images reveals the precision-
 \begin{table}[H]
     \footnotesize 
     \centering
-    \caption{Precision Analysis on Real Image Dataset (7,721 images)}
+    \caption{Precision Analysis on Real Image Dataset (7,721 total images)}
     \label{tab:precision_analysis}
-    \setlength{\tabcolsep}{3pt}
-    \begin{tabularx}{\columnwidth}{|l|c|c|c|c|}
+    \setlength{\tabcolsep}{6pt}
+    \begin{tabularx}{\columnwidth}{|l|c|c|c|}
         \hline
-        \textbf{Dataset Size} & \textbf{Linear Found} & \textbf{Hash Found} & \textbf{Hash Dynamic Found} & \textbf{Precision Ratio} \\
+        \textbf{Algorithm} & \textbf{500 Images} & \textbf{1000 Images} & \textbf{7721 Images} \\
         \hline
-        500 & 171 & 146 & 171 & 85.4\% / 100\% \\
-        1000 & 357 & 307 & 357 & 86.0\% / 100\% \\
-        7721 & 2858 & 2471 & 2858 & 86.5\% / 100\% \\
+        Linear Search (Ground Truth) & 171 & 357 & 2858 \\
+        Hash Search & 146 & 307 & 2471 \\
+        Hash Dynamic Search & 171 & 357 & 2858 \\
+        \hline
+        \textbf{Hash Precision (\%)} & 85.4\% & 86.0\% & 86.5\% \\
+        \textbf{Hash Dynamic Precision (\%)} & 100\% & 100\% & 100\% \\
         \hline
     \end{tabularx}
     \vspace{0.2cm}
     \begin{minipage}{\columnwidth}
     \footnotesize
-    \textit{Precision Ratio: Hash Search vs Linear Search / Hash Dynamic vs Linear Search}
+    \textit{Values represent number of similar images found. Precision calculated relative to Linear Search baseline.}
     \end{minipage}
 \end{table}
 
