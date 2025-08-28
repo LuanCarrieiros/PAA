@@ -1165,7 +1165,7 @@ private:
             searchSingleCell(center_r, center_g, center_b, query, threshold, results);
             return;
         }
-        
+
         // TÉCNICA PAA: Busca apenas na "casca" do cubo de raio r
         // Evita reprocessar células já examinadas em raios menores
         for (int dr = -radius; dr <= radius; dr++) {
@@ -1184,7 +1184,7 @@ private:
     void searchSingleCell(int r_cell, int g_cell, int b_cell,
                          const Image& query, double threshold, std::vector<Image>& results) {
         std::string key = getCellKey(r_cell, g_cell, b_cell);
-        
+
         auto it = grid.find(key);
         if (it != grid.end()) {
             for (const auto& img : it->second) {
@@ -1206,24 +1206,24 @@ public:
     
     std::vector<Image> findSimilar(const Image& query, double threshold) override {
         std::vector<Image> results;
-        
+
         int query_r = rgbToCell(query.r);
         int query_g = rgbToCell(query.g);  
         int query_b = rgbToCell(query.b);
-        
+
         // BUSCA DINÂMICA: expande em camadas até cobrir o threshold
         int max_radius = static_cast<int>(ceil(threshold / cellSize));
-        
+
         for (int radius = 0; radius <= max_radius; radius++) {
             searchCubeAtRadius(query_r, query_g, query_b, radius, query, threshold, results);
         }
-        
+
         // Ordenar por distância (nearest-first)
         std::sort(results.begin(), results.end(),
                  [&query](const Image& a, const Image& b) {
                      return query.distanceTo(a) < query.distanceTo(b);
                  });
-        
+
         return results;
     }
     
@@ -1236,7 +1236,7 @@ public:
         std::cout << "    Células ativas: " << grid.size() << std::endl;
         std::cout << "    Tamanho da célula: " << cellSize << std::endl;
         std::cout << "    Estratégia: Expansão em camadas concêntricas" << std::endl;
-        
+
         if (!grid.empty()) {
             size_t totalImages = 0;
             for (const auto& pair : grid) {
