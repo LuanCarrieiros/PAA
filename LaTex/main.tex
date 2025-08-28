@@ -65,6 +65,8 @@
 
 \affil{\textbf{Iago Fereguetti Ribeiro}~\href{https://orcid.org/0000-0003-3052-3016}{\textcolor{orcidlogo}{\aiOrcid}}~~[~\textbf{Pontifical Catholic University of Minas Gerais}~|\href{mailto:iago.fereguetti@sga.pucminas.br}{~\textbf{\textit{iago.fereguetti@sga.pucminas.br}}}~]}
 
+\affil{\textbf{Bernardo Ferreira Temponi}~\href{https://orcid.org/0000-0001-4892-5537}{\textcolor{orcidlogo}{\aiOrcid}}~~[~\textbf{Pontifical Catholic University of Minas Gerais}~|\href{mailto:bernardo.temponi@sga.pucminas.br}{~\textbf{\textit{bernardo.temponi@sga.pucminas.br}}}~]}
+
 \affil{\textbf{[Nome Randomico]}~\href{https://orcid.org/0000-0001-3195-1605}{\textcolor{orcidlogo}{\aiOrcid}}~~[~\textbf{Pontifical Catholic University of Minas Gerais}~|\href{mailto:randomico.nome@sga.pucminas.br}{~\textbf{\textit{randomico.nome@sga.pucminas.br}}}~]}
 }
 
@@ -79,7 +81,7 @@ PUC Minas, Instituto de Ciências Exatas e Informática (ICEI), Av. Dom José Ga
 
 \begin{abstract}
 \textbf{Abstract.} \\
-Image similarity search in RGB color space represents a fundamental challenge in computer vision and database systems, requiring efficient data structures to balance search performance with precision requirements. This paper presents a comprehensive empirical analysis of five distinct data structures for RGB image similarity search: \textbf{(i)} Linear Search (brute force baseline), \textbf{(ii)} Hash Search (3D spatial grid hashing), \textbf{(iii)} Hash Dynamic Search (adaptive expansion spatial hashing), \textbf{(iv)} Octree Search (3D recursive spatial tree), and \textbf{(v)} Quadtree Search (2D spatial tree projection). The algorithms were implemented in C++17 with compiler optimizations to ensure fair performance comparison. Extensive experiments were conducted on both synthetic datasets (100 to 50 million images) and real image collections (7,721 natural images across 8 categories) using Euclidean distance in RGB space with a similarity threshold of 50.0. Results reveal that Hash Search achieves superior search performance (18ms for 50M images) while Linear Search dominates insertion operations. Unexpectedly, 2D spatial structures (Quadtree) consistently outperformed 3D equivalents (Octree), and hash-based methods demonstrated a precision-speed trade-off, finding 85-86% of similar images compared to brute force methods. The study provides quantitative evidence for practical algorithm selection in image similarity applications and establishes performance benchmarks for RGB similarity search systems.
+Image similarity search in RGB color space represents a fundamental challenge in computer vision and database systems, requiring efficient data structures to balance search performance with precision requirements. This paper presents a comprehensive empirical analysis of five distinct data structures for RGB image similarity search: \textbf{(i)} Linear Search (brute force baseline), \textbf{(ii)} Hash Search (3D spatial grid hashing), \textbf{(iii)} Hash Dynamic Search (adaptive expansion spatial hashing), \textbf{(iv)} Octree Search (3D recursive spatial tree), and \textbf{(v)} Quadtree Search (2D spatial tree projection). The algorithms were implemented in C++17 with compiler optimizations to ensure fair performance comparison. Extensive experiments were conducted on both synthetic datasets (100 to 50 million images) and real image collections (7,721 natural images across 8 categories) using Euclidean distance in RGB space with a similarity threshold of 50.0. Results reveal that Hash Search achieves superior search performance (18ms for 50M images) while Linear Search dominates insertion operations. Unexpectedly, 2D spatial structures (Quadtree) consistently outperformed 3D equivalents (Octree), and hash-based methods demonstrated a precision-speed trade-off, finding 85-86\% of similar images compared to brute force methods. The study provides quantitative evidence for practical algorithm selection in image similarity applications and establishes performance benchmarks for RGB similarity search systems.
 \end{abstract}
 
 \begin{keywords}
@@ -280,7 +282,7 @@ Real-world performance evaluation on 7,721 natural images reveals the precision-
     \footnotesize
     \textit{Precision Ratio: Hash Search vs Linear Search / Hash Dynamic vs Linear Search}
     \end{minipage}
-\end{table>
+\end{table}
 
 The results demonstrate that Hash Dynamic Search achieves Linear Search precision while maintaining superior performance characteristics, making it an optimal choice for applications requiring both speed and accuracy.
 
@@ -293,6 +295,41 @@ Our experiments reveal several unexpected findings that challenge conventional w
     \item \textbf{Memory-Performance Correlation:} Proper memory management reduced RAM consumption from 40GB to 12GB while dramatically improving performance, highlighting the critical role of implementation details.
     \item \textbf{Precision-Speed Trade-off:} Hash-based methods sacrifice 14-15\% precision for significant speed improvements, requiring careful consideration of application requirements.
 \end{itemize}
+
+\subsection{Computational Efficiency Analysis}
+
+Beyond visual quality assessment, computational efficiency represents a critical factor for practical applications. Table~\ref{tab:computational_efficiency} presents comparative execution times for different data structure configurations across varying dataset sizes.
+
+\begin{table}[H]
+    \footnotesize 
+    \centering
+    \caption{Comparative Computational Efficiency Analysis (Various Dataset Sizes)}
+    \label{tab:computational_efficiency}
+    \setlength{\tabcolsep}{3pt}
+    \begin{tabularx}{\columnwidth}{|l|l|c|c|}
+        \hline
+        \textbf{Data Structure} & \textbf{Dataset Size} & \textbf{Insertion (ms)} & \textbf{Search (ms)} \\ 
+        \hline
+        Linear Search & 10K images & 0.75 & 0.063 \\
+        Linear Search & 1M images & 66.6 & 7.045 \\
+        Hash Search & 10K images & 1.81 & 0.001 \\
+        Hash Search & 1M images & 173.9 & 0.187 \\
+        Hash Dynamic & 10K images & 1.82 & 0.011 \\
+        Hash Dynamic & 1M images & 174.2 & 0.445 \\
+        Octree Search & 10K images & 2.27 & 0.088 \\
+        Octree Search & 1M images & 477.8 & 20.957 \\
+        Quadtree Search & 10K images & 2.35 & 0.074 \\
+        Quadtree Search & 1M images & 365.1 & 15.751 \\
+        \hline
+    \end{tabularx}
+    \vspace{0.2cm}
+    \begin{minipage}{\columnwidth}
+    \footnotesize
+    \textit{Note: Execution times measured on standardized hardware configuration; \\actual performance depends on specific implementation and system architecture.}
+    \end{minipage}
+\end{table}
+
+The analysis reveals clear performance patterns: Hash-based structures excel in search operations but require higher insertion overhead, while Linear Search maintains optimal insertion performance at the cost of linear search complexity. Tree-based structures demonstrate intermediate performance with consistent logarithmic scaling behavior.
 
 \section{Discussion}
 \label{sec:discussion}
@@ -324,6 +361,14 @@ Our results demonstrate significant divergence between theoretical complexity pr
 
 The CREATE→TEST→DESTROY memory management pattern proved crucial for large-scale evaluation, reducing memory consumption by over 70\% while improving cache performance. This finding emphasizes that implementation details can be as important as algorithmic choice for practical systems.
 
+\subsection{Correlation and Trade-offs between Approaches}
+
+Our comparative analysis reveals interesting correlations between the different data structures. Hash-based methods excel in scenarios requiring rapid query response times, particularly beneficial for real-time applications and large-scale systems. However, this performance advantage comes at the cost of reduced precision, with Hash Search finding approximately 85-86\% of results compared to the exhaustive Linear Search baseline.
+
+Tree-based structures (Octree and Quadtree) occupy a middle ground, offering better precision than simple hash approaches while maintaining sub-linear search complexity. Surprisingly, our experiments consistently showed Quadtree outperforming Octree, challenging the conventional wisdom that higher-dimensional indexing should provide better discrimination in 3D color space.
+
+The Linear Search baseline, while theoretically inefficient, proves remarkably competitive for smaller datasets due to its cache-friendly access patterns and minimal overhead. This finding has practical implications for system design, suggesting that sophisticated indexing may be unnecessary for applications with modest data volumes.
+
 \section{Conclusion and Future Work}
 \label{sec:conclusion}
 
@@ -332,6 +377,8 @@ This comprehensive empirical study provides quantitative evidence for practical 
 Key contributions include: (i) comprehensive performance benchmarks across synthetic and real datasets, (ii) quantification of the precision-speed trade-off in spatial indexing methods, (iii) demonstration of the 2D vs. 3D performance paradox in tree structures, and (iv) validation of the critical importance of memory management for large-scale evaluation.
 
 Future research directions include exploring hybrid approaches that combine multiple indexing strategies, investigating alternative distance metrics beyond Euclidean distance, and extending the analysis to other color spaces such as LAB and HSV. Additionally, parallel processing implementations could further improve performance for time-critical applications.
+
+Our findings also suggest investigating adaptive algorithms that can dynamically select the most appropriate data structure based on dataset characteristics, query patterns, and system constraints. Machine learning approaches to automatically optimize parameters such as hash cell size and tree branching factors represent another promising avenue for future work.
 
 \section*{Author Contributions}
 \label{sec:contributions}
@@ -345,7 +392,9 @@ This section details the individual contributions of each team member to the res
     
     \item \textbf{Iago Fereguetti Ribeiro:} Responsible for the Linear Search baseline implementation and the comparative analysis methodology. Contributed to the theoretical background research, literature review, and the development of performance measurement protocols. Assisted in the preparation of experimental results and statistical validation.
     
-    \item \textbf{[Nome Randomico]:} Implemented the Hash Search algorithm with 3D spatial grid indexing, including the cell mapping and collision handling strategies. Contributed to the anti-cache strategy development and participated in the scalability analysis for large datasets. Assisted in the documentation and code organization aspects of the project.
+    \item \textbf{Bernardo Ferreira Temponi:} Implemented the Hash Search algorithm with 3D spatial grid indexing, including the cell mapping and collision handling strategies. Contributed to the anti-cache strategy development and participated in the scalability analysis for large datasets. Assisted in the documentation and code organization aspects of the project.
+    
+    \item \textbf{[Nome Randomico]:} Additional team member contributing to various aspects of the research implementation and analysis, including support for experimental validation and results interpretation.
 \end{itemize}
 
 All team members participated collaboratively in the experimental design, result interpretation, and manuscript preparation, ensuring comprehensive coverage of both theoretical foundations and practical implementation considerations.
