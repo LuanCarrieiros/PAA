@@ -1,0 +1,64 @@
+# Executáveis compilados
+*.exe
+*.out
+*.app
+paa_trabalho1
+scalable
+img_benchmark
+rec_iter
+benchmark_100m
+benchmark_local
+benchmark_simple
+
+# Arquivos de compilação
+*.o
+*.obj
+*.dll
+*.so
+*.dylib
+
+# Arquivos temporários do sistema
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Arquivos do Visual Studio / Visual Studio Code
+.vs/
+.vscode/
+*.vcxproj*
+*.sln
+*.suo
+*.user
+
+# Arquivos temporários do compilador
+*.tmp
+*.temp
+
+# Logs e arquivos de debug
+*.log
+debug/
+Debug/
+Release/
+
+# Dados muito grandes (opcional)
+# Images/natural_images/*.jpg
+# *.txt
+
+# Arquivos de backup
+*.bak
+*.backup
+
+# Node modules (caso use alguma ferramenta JS)
+node_modules/
+
+# Python (caso use scripts auxiliares)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Arquivos específicos do Windows
+*.lnk
+ehthumbs.db
