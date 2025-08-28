@@ -59,7 +59,7 @@ g++ -O2 -o rec_iter src/benchmarks/benchmark_recursivo_vs_iterativo.cpp
 ```bash
 g++ -O2 -o benchmark_100m src/benchmarks/benchmark_100M_only.cpp
 ./benchmark_100m
-# ⚠️ AVISO: Requer ~12GB RAM
+# ⚠️ AVISO: Requer ~12GB RAM (com 16GB após 2 horas não consegui)
 ```
 
 ## 🎯 Principais Descobertas
