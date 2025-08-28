@@ -15,7 +15,7 @@
 struct Image;
 class ImageDatabase;
 
-// Nó da Quadtree (2D - usando apenas R e G)
+// No da Quadtree (2D - usando apenas R e G)
 struct QuadtreeNode {
     double minR, maxR, minG, maxG;
     std::vector<Image> images;
@@ -104,7 +104,7 @@ private:
         }
     }
     
-    // Função auxiliar iterativa para inserção em filhos
+    // Funcao auxiliar iterativa para insercao em filhos
     void insertIntoChild(QuadtreeNode* startNode, const Image& img, int startDepth) {
         std::stack<std::pair<QuadtreeNode*, int>> nodeStack;
         nodeStack.push({startNode, startDepth});
@@ -128,7 +128,7 @@ private:
                         int childIdx = node->getChildIndex(existingImg);
                         nodeStack.push({node->children[childIdx].get(), depth + 1});
                         
-                        // Inserir diretamente no nó filho
+                        // Inserir diretamente no no filho
                         QuadtreeNode* targetChild = node->children[childIdx].get();
                         targetChild->images.push_back(existingImg);
                     }
@@ -141,7 +141,7 @@ private:
     }
     
     bool nodeIntersectsQueryRadius(QuadtreeNode* node, const Image& query, double threshold) const {
-        // Calcular distância mínima do ponto query ao retângulo do nó
+        // Calcular distancia minima do ponto query ao retangulo do no
         double minDistSq = 0.0;
         
         // Verificar componente R
@@ -162,7 +162,7 @@ private:
             minDistSq += diff * diff;
         }
         
-        // Para Quadtree 2D, ainda precisamos considerar B na distância final
+        // Para Quadtree 2D, ainda precisamos considerar B na distancia final
         // mas para pruning, usamos apenas R,G
         return sqrt(minDistSq) <= threshold;
     }
@@ -183,7 +183,7 @@ private:
             
             if (node->isLeaf) {
                 for (const auto& img : node->images) {
-                    double distance = query.distanceTo(img); // Distância 3D completa (R,G,B)
+                    double distance = query.distanceTo(img); // Distancia 3D completa (R,G,B)
                     if (distance <= threshold) {
                         results.push_back(img);
                     }
