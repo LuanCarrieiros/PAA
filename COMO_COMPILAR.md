@@ -31,8 +31,8 @@ PAA/
 
 ### **🎓 Código Educativo Principal**
 ```bash
-g++ -O2 -o paa_trabalho1 src/PAA_Trabalho1.cpp
-./paa_trabalho1
+g++ -O2 -o main src/main.cpp
+./main
 ```
 
 ### **🚀 Benchmark Sintético Principal (100 → 50M imagens)**
