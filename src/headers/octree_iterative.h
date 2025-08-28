@@ -16,7 +16,7 @@
 struct Image;
 class ImageDatabase;
 
-// Nó da Octree iterativa
+// No da Octree iterativa
 struct OctreeNodeIterative {
     double minR, maxR, minG, maxG, minB, maxB;
     std::vector<Image> images;
@@ -67,7 +67,7 @@ struct OctreeNodeIterative {
     }
 };
 
-// Estrutura para manter estado durante inserção iterativa
+// Estrutura para manter estado durante insercao iterativa
 struct InsertionStackFrame {
     OctreeNodeIterative* node;
     const Image* img;
@@ -87,7 +87,7 @@ private:
     int maxDepth;
     
     void insertIterative(const Image& img) {
-        // Usar uma abordagem mais simples: navegar até o nó folha e inserir
+        // Usar uma abordagem mais simples: navegar ate o no folha e inserir
         OctreeNodeIterative* currentNode = root.get();
         int currentDepth = 0;
         
@@ -109,13 +109,13 @@ private:
                     for (const auto& existingImg : imagesToRedistribute) {
                         int childIdx = currentNode->getChildIndex(existingImg);
                         
-                        // Inserir recursivamente em cada filho (pode gerar mais divisões)
+                        // Inserir recursivamente em cada filho (pode gerar mais divisoes)
                         insertIntoChild(currentNode->children[childIdx].get(), existingImg, currentDepth + 1);
                     }
                 }
-                break; // Inserção concluída
+                break; // Insercao concluida
             } else {
-                // Nó interno - descer para filho apropriado
+                // No interno - descer para filho apropriado
                 int childIdx = currentNode->getChildIndex(img);
                 currentNode = currentNode->children[childIdx].get();
                 currentDepth++;
@@ -123,23 +123,23 @@ private:
         }
     }
     
-    // Função auxiliar 100% iterativa para inserção em filhos
+    // Funcao auxiliar 100% iterativa para insercao em filhos
     void insertIntoChild(OctreeNodeIterative* startNode, const Image& img, int startDepth) {
-        // Stack para navegação iterativa
+        // Stack para navegacao iterativa
         std::stack<std::pair<OctreeNodeIterative*, int>> nodeStack;
         nodeStack.push({startNode, startDepth});
         
-        // Stack para redistribuição
+        // Stack para redistribuicao
         std::stack<std::tuple<OctreeNodeIterative*, Image, int>> redistribStack;
         
         while (!nodeStack.empty() || !redistribStack.empty()) {
-            // Processar redistribuições pendentes primeiro
+            // Processar redistribuicoes pendentes primeiro
             if (!redistribStack.empty()) {
                 auto [node, image, depth] = redistribStack.top();
                 redistribStack.pop();
                 nodeStack.push({node, depth});
                 
-                // Navegar até nó folha para esta imagem
+                // Navegar ate no folha para esta imagem
                 OctreeNodeIterative* currentNode = node;
                 int currentDepth = depth;
                 
@@ -168,7 +168,7 @@ private:
                 continue;
             }
             
-            // Processar nós normais
+            // Processar nos normais
             auto [node, depth] = nodeStack.top();
             nodeStack.pop();
             
@@ -240,7 +240,7 @@ private:
             }
             
             if (node->isLeaf) {
-                // Nó folha - verificar todas as imagens
+                // No folha - verificar todas as imagens
                 for (const auto& img : node->images) {
                     double distance = query.distanceTo(img);
                     if (distance <= threshold) {
@@ -248,7 +248,7 @@ private:
                     }
                 }
             } else {
-                // Nó interno - adicionar filhos à fila
+                // No interno - adicionar filhos a fila
                 for (const auto& child : node->children) {
                     if (child) {
                         queue.push(child.get());
