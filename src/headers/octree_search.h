@@ -6,29 +6,29 @@
 #include <memory>
 
 /**
- * @brief Nó da Octree para indexação de imagens no espaço RGB 3D
+ * @brief No da Octree para indexacao de imagens no espaco RGB 3D
  * 
- * Cada nó representa uma região cúbica do espaço RGB e pode ter até 8 filhos,
- * dividindo o cubo em sub-regiões menores quando necessário.
+ * Cada no representa uma regiao cubica do espaco RGB e pode ter ate 8 filhos,
+ * dividindo o cubo em sub-regioes menores quando necessario.
  */
 struct OctreeNode {
-    // Limites da região que este nó representa no espaço RGB
+    // Limites da regiao que este no representa no espaco RGB
     double minR, maxR;  // Faixa do canal Red (0-255)
     double minG, maxG;  // Faixa do canal Green (0-255) 
     double minB, maxB;  // Faixa do canal Blue (0-255)
     
-    // Imagens armazenadas neste nó (só folhas têm imagens)
+    // Imagens armazenadas neste no (so folhas tem imagens)
     std::vector<Image> images;
     
     // 8 filhos representando os 8 sub-cubos (octantes)
-    // Ordem: [000, 001, 010, 011, 100, 101, 110, 111] em binário RGB
+    // Ordem: [000, 001, 010, 011, 100, 101, 110, 111] em binario RGB
     std::array<std::unique_ptr<OctreeNode>, 8> children;
     
-    // Flag para indicar se é um nó folha
+    // Flag para indicar se e um no folha
     bool isLeaf;
     
     /**
-     * @brief Construtor do nó
+     * @brief Construtor do no
      * @param minR, maxR Limites do canal Red
      * @param minG, maxG Limites do canal Green  
      * @param minB, maxB Limites do canal Blue
@@ -41,9 +41,9 @@ struct OctreeNode {
     }
     
     /**
-     * @brief Verifica se uma imagem está dentro dos limites deste nó
+     * @brief Verifica se uma imagem esta dentro dos limites deste no
      * @param img A imagem a ser testada
-     * @return true se a imagem está dentro dos limites, false caso contrário
+     * @return true se a imagem esta dentro dos limites, false caso contrario
      */
     bool contains(const Image& img) const {
         return img.r >= minR && img.r <= maxR &&
@@ -52,9 +52,9 @@ struct OctreeNode {
     }
     
     /**
-     * @brief Calcula o índice do filho onde uma imagem deve ser inserida
-     * @param img A imagem para calcular o índice
-     * @return Índice do filho (0-7) baseado na posição RGB da imagem
+     * @brief Calcula o indice do filho onde uma imagem deve ser inserida
+     * @param img A imagem para calcular o indice
+     * @return Indice do filho (0-7) baseado na posicao RGB da imagem
      */
     int getChildIndex(const Image& img) const {
         int index = 0;
@@ -73,9 +73,9 @@ struct OctreeNode {
     }
     
     /**
-     * @brief Cria os 8 filhos dividindo o espaço atual em octantes
+     * @brief Cria os 8 filhos dividindo o espaco atual em octantes
      * 
-     * Divide cada dimensão RGB ao meio, criando 8 sub-cubos:
+     * Divide cada dimensao RGB ao meio, criando 8 sub-cubos:
      * - 000 (0): minR-midR, minG-midG, minB-midB
      * - 001 (1): minR-midR, minG-midG, midB-maxB  
      * - ... e assim por diante
@@ -85,7 +85,7 @@ struct OctreeNode {
         double midG = (minG + maxG) / 2.0;
         double midB = (minB + maxB) / 2.0;
         
-        // Cria os 8 octantes seguindo a ordem binária RGB
+        // Cria os 8 octantes seguindo a ordem binaria RGB
         children[0] = std::make_unique<OctreeNode>(minR, midR, minG, midG, minB, midB); // 000
         children[1] = std::make_unique<OctreeNode>(minR, midR, minG, midG, midB, maxB); // 001  
         children[2] = std::make_unique<OctreeNode>(minR, midR, midG, maxG, minB, midB); // 010
@@ -95,41 +95,41 @@ struct OctreeNode {
         children[6] = std::make_unique<OctreeNode>(midR, maxR, midG, maxG, minB, midB); // 110  
         children[7] = std::make_unique<OctreeNode>(midR, maxR, midG, maxG, midB, maxB); // 111
         
-        isLeaf = false; // Agora tem filhos, não é mais folha
+        isLeaf = false; // Agora tem filhos, nao e mais folha
     }
 };
 
 /**
- * @brief Octree para busca eficiente de imagens similares no espaço RGB
+ * @brief Octree para busca eficiente de imagens similares no espaco RGB
  * 
- * Implementa uma árvore espacial 3D que divide hierarquicamente o espaço RGB
- * em regiões menores, permitindo buscas de proximidade mais eficientes que
+ * Implementa uma arvore espacial 3D que divide hierarquicamente o espaco RGB
+ * em regioes menores, permitindo buscas de proximidade mais eficientes que
  * a busca linear tradicional.
  * 
  * Baseado no algoritmo HOQ (Hierarchical Octa-partition Quantization)
- * mencionado no paper de referência.
+ * mencionado no paper de referencia.
  */
 class OctreeSearch : public ImageDatabase {
 private:
-    std::unique_ptr<OctreeNode> root;  // Nó raiz da árvore
-    int maxImagesPerNode;              // Threshold para dividir nós
+    std::unique_ptr<OctreeNode> root;  // No raiz da arvore
+    int maxImagesPerNode;              // Threshold para dividir nos
     int totalImages;                   // Contador total de imagens
-    int maxDepth;                      // Profundidade máxima observada
+    int maxDepth;                      // Profundidade maxima observada
     
     /**
-     * @brief Insere uma imagem recursivamente na árvore
-     * @param node Nó atual da inserção
+     * @brief Insere uma imagem recursivamente na arvore
+     * @param node No atual da insercao
      * @param img Imagem a ser inserida  
-     * @param depth Profundidade atual (para estatísticas)
+     * @param depth Profundidade atual (para estatisticas)
      */
     void insertRecursive(OctreeNode* node, const Image& img, int depth = 0) {
         maxDepth = std::max(maxDepth, depth);
         
-        // Se é folha e não excedeu o threshold, adiciona aqui
+        // Se e folha e nao excedeu o threshold, adiciona aqui
         if (node->isLeaf) {
             node->images.push_back(img);
             
-            // Se excedeu o threshold, divide o nó
+            // Se excedeu o threshold, divide o no
             if (node->images.size() > maxImagesPerNode) {
                 node->createChildren();
                 
@@ -139,21 +139,21 @@ private:
                     insertRecursive(node->children[childIdx].get(), existingImg, depth + 1);
                 }
                 
-                // Limpa as imagens do nó pai (agora não é mais folha)
+                // Limpa as imagens do no pai (agora nao e mais folha)
                 node->images.clear();
             }
         } else {
-            // Não é folha, insere no filho apropriado
+            // Nao e folha, insere no filho apropriado
             int childIdx = node->getChildIndex(img);
             insertRecursive(node->children[childIdx].get(), img, depth + 1);
         }
     }
     
     /**
-     * @brief Busca imagens similares recursivamente na árvore
-     * @param node Nó atual da busca
+     * @brief Busca imagens similares recursivamente na arvore
+     * @param node No atual da busca
      * @param query Imagem de consulta
-     * @param threshold Raio de busca (distância máxima)
+     * @param threshold Raio de busca (distancia maxima)
      * @param results Vetor para acumular resultados
      */
     void searchRecursive(OctreeNode* node, const Image& query, double threshold, 
@@ -161,14 +161,14 @@ private:
         
         if (!node) return;
         
-        // Verifica se o nó pode conter imagens similares
-        // Calcula distância mínima possível do query para este cubo
+        // Verifica se o no pode conter imagens similares
+        // Calcula distancia minima possivel do query para este cubo
         if (!nodeIntersectsQueryRadius(node, query, threshold)) {
-            return; // Poda: este nó não pode ter resultados
+            return; // Poda: este no nao pode ter resultados
         }
         
         if (node->isLeaf) {
-            // Nó folha: verifica todas as imagens
+            // No folha: verifica todas as imagens
             for (const auto& img : node->images) {
                 double distance = query.distanceTo(img);
                 if (distance <= threshold) {
@@ -176,7 +176,7 @@ private:
                 }
             }
         } else {
-            // Nó interno: busca recursivamente nos filhos
+            // No interno: busca recursivamente nos filhos
             for (const auto& child : node->children) {
                 if (child) {
                     searchRecursive(child.get(), query, threshold, results);
@@ -186,17 +186,17 @@ private:
     }
     
     /**
-     * @brief Verifica se um nó pode conter imagens dentro do raio de busca
-     * @param node Nó a ser testado
+     * @brief Verifica se um no pode conter imagens dentro do raio de busca
+     * @param node No a ser testado
      * @param query Imagem de consulta  
      * @param threshold Raio de busca
-     * @return true se o nó intersecta com a esfera de busca
+     * @return true se o no intersecta com a esfera de busca
      */
     bool nodeIntersectsQueryRadius(OctreeNode* node, const Image& query, double threshold) const {
-        // Calcula distância mínima do ponto query para o cubo do nó
+        // Calcula distancia minima do ponto query para o cubo do no
         double minDistSq = 0.0;
         
-        // Para cada dimensão, calcula a distância mínima
+        // Para cada dimensao, calcula a distancia minima
         if (query.r < node->minR) {
             double diff = node->minR - query.r;
             minDistSq += diff * diff;
@@ -221,15 +221,15 @@ private:
             minDistSq += diff * diff;
         }
         
-        // Se distância mínima <= threshold, pode ter resultados
+        // Se distancia minima <= threshold, pode ter resultados
         return sqrt(minDistSq) <= threshold;
     }
     
     /**
-     * @brief Conta nós recursivamente para estatísticas
-     * @param node Nó atual
-     * @param leafCount Contador de folhas (por referência)
-     * @param internalCount Contador de nós internos (por referência)
+     * @brief Conta nos recursivamente para estatisticas
+     * @param node No atual
+     * @param leafCount Contador de folhas (por referencia)
+     * @param internalCount Contador de nos internos (por referencia)
      */
     void countNodes(OctreeNode* node, int& leafCount, int& internalCount) const {
         if (!node) return;
@@ -247,11 +247,11 @@ private:
 public:
     /**
      * @brief Construtor da Octree
-     * @param maxImages Número máximo de imagens por nó antes da divisão
+     * @param maxImages Numero maximo de imagens por no antes da divisao
      */
     OctreeSearch(int maxImages = 10) 
         : maxImagesPerNode(maxImages), totalImages(0), maxDepth(0) {
-        // Cria raiz cobrindo todo o espaço RGB (0-255 em cada canal)
+        // Cria raiz cobrindo todo o espaco RGB (0-255 em cada canal)
         root = std::make_unique<OctreeNode>(0, 255, 0, 255, 0, 255);
     }
     
@@ -264,7 +264,7 @@ public:
         std::vector<Image> results;
         searchRecursive(root.get(), query, threshold, results);
         
-        // Ordena resultados por distância (mais similares primeiro)
+        // Ordena resultados por distancia (mais similares primeiro)
         std::sort(results.begin(), results.end(), 
                  [&query](const Image& a, const Image& b) {
                      return query.distanceTo(a) < query.distanceTo(b);
@@ -278,7 +278,7 @@ public:
     }
     
     /**
-     * @brief Imprime estatísticas detalhadas da Octree
+     * @brief Imprime estatisticas detalhadas da Octree
      */
     void printStats() const {
         int leafCount = 0, internalCount = 0;
@@ -286,14 +286,14 @@ public:
         
         std::cout << "Octree Stats:" << std::endl;
         std::cout << "  Total de imagens: " << totalImages << std::endl;
-        std::cout << "  Máx imagens por nó: " << maxImagesPerNode << std::endl;
-        std::cout << "  Profundidade máxima: " << maxDepth << std::endl;
-        std::cout << "  Nós folha: " << leafCount << std::endl;
-        std::cout << "  Nós internos: " << internalCount << std::endl;
-        std::cout << "  Total de nós: " << (leafCount + internalCount) << std::endl;
+        std::cout << "  Max imagens por no: " << maxImagesPerNode << std::endl;
+        std::cout << "  Profundidade maxima: " << maxDepth << std::endl;
+        std::cout << "  Nos folha: " << leafCount << std::endl;
+        std::cout << "  Nos internos: " << internalCount << std::endl;
+        std::cout << "  Total de nos: " << (leafCount + internalCount) << std::endl;
         
         if (leafCount > 0) {
-            std::cout << "  Imagens por folha (média): " 
+            std::cout << "  Imagens por folha (media): " 
                       << static_cast<double>(totalImages) / leafCount << std::endl;
         }
     }
