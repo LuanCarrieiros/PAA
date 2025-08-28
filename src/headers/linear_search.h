@@ -23,7 +23,7 @@ public:
             }
         }
         
-        // Ordena por distância (mais similares primeiro)
+        // Ordena por distancia (mais similares primeiro)
         std::sort(results.begin(), results.end(), 
                  [&query](const Image& a, const Image& b) {
                      return query.distanceTo(a) < query.distanceTo(b);
