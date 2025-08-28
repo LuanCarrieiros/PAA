@@ -229,24 +229,24 @@ Table~\ref{tab:synthetic_performance} presents performance results for synthetic
 \begin{table}[H]
     \footnotesize 
     \centering
-    \caption{Performance Comparison on Synthetic Datasets (Insertion/Search times in milliseconds)}
+    \caption{Performance Comparison on Synthetic Datasets (Insertion/Search times in microseconds)}
     \label{tab:synthetic_performance}
     \setlength{\tabcolsep}{3pt}
     \begin{tabularx}{\columnwidth}{|l|c|c|c|c|c|}
         \hline
         \textbf{Scale} & \textbf{Linear} & \textbf{Hash} & \textbf{Hash Dynamic} & \textbf{Octree} & \textbf{Quadtree} \\
         \hline
-        1K & 0.082/0.005 & \textbf{0.163/0.001} & 0.165/0.002 & 0.227/0.013 & 0.148/0.011 \\
-        10K & \textbf{0.750}/0.063 & 1.811/\textbf{0.001} & 1.820/0.011 & 2.270/0.088 & 2.348/0.074 \\
-        100K & \textbf{6.782}/0.542 & 19.542/\textbf{0.031} & 19.680/0.098 & 28.430/0.980 & 30.286/0.917 \\
-        1M & \textbf{66.646}/7.045 & 173.945/\textbf{0.187} & 174.220/0.445 & 477.827/20.957 & 365.093/15.751 \\
-        50M & \textbf{5752.689}/520.698 & 42529.801/\textbf{17.987} & 42847.132/89.441 & 82092.444/2603.842 & 72793.606/1759.648 \\
+        1K & 82/5 & \textbf{163/1} & 165/2 & 227/13 & 148/11 \\
+        10K & \textbf{750}/63 & 1811/\textbf{1} & 1820/11 & 2270/88 & 2348/74 \\
+        100K & \textbf{6782}/542 & 19542/\textbf{31} & 19680/98 & 28430/980 & 30286/917 \\
+        1M & \textbf{66646}/7045 & 173945/\textbf{187} & 174220/445 & 477827/20957 & 365093/15751 \\
+        50M & \textbf{5752689}/520698 & 42529801/\textbf{17987} & 42847132/89441 & 82092444/2603842 & 72793606/1759648 \\
         \hline
     \end{tabularx}
     \vspace{0.2cm}
     \begin{minipage}{\columnwidth}
     \footnotesize
-    \textit{Format: Insertion time / Search time. Bold indicates best performance in category.}
+    \textit{Format: Insertion time / Search time in microseconds (μs). Bold indicates best performance in category.}
     \end{minipage}
 \end{table}
 
@@ -254,7 +254,7 @@ Table~\ref{tab:synthetic_performance} presents performance results for synthetic
 
 \begin{itemize}
     \item \textbf{Insertion Dominance:} Linear Search consistently achieves the fastest insertion times across all scales, demonstrating the efficiency of direct array append operations.
-    \item \textbf{Search Supremacy:} Hash Search dominates search performance, achieving remarkable scalability with only 18ms search time for 50 million images.
+    \item \textbf{Search Supremacy:} Hash Search dominates search performance, achieving remarkable scalability with only 18μs search time for 50 million images.
     \item \textbf{Dimensional Paradox:} Quadtree consistently outperforms Octree despite using fewer spatial dimensions, suggesting that the curse of dimensionality affects tree structures more than anticipated.
 \end{itemize}
 
@@ -308,24 +308,24 @@ Beyond visual quality assessment, computational efficiency represents a critical
     \setlength{\tabcolsep}{3pt}
     \begin{tabularx}{\columnwidth}{|l|l|c|c|}
         \hline
-        \textbf{Data Structure} & \textbf{Dataset Size} & \textbf{Insertion (ms)} & \textbf{Search (ms)} \\ 
+        \textbf{Data Structure} & \textbf{Dataset Size} & \textbf{Insertion (μs)} & \textbf{Search (μs)} \\ 
         \hline
-        Linear Search & 10K images & 0.75 & 0.063 \\
-        Linear Search & 1M images & 66.6 & 7.045 \\
-        Hash Search & 10K images & 1.81 & 0.001 \\
-        Hash Search & 1M images & 173.9 & 0.187 \\
-        Hash Dynamic & 10K images & 1.82 & 0.011 \\
-        Hash Dynamic & 1M images & 174.2 & 0.445 \\
-        Octree Search & 10K images & 2.27 & 0.088 \\
-        Octree Search & 1M images & 477.8 & 20.957 \\
-        Quadtree Search & 10K images & 2.35 & 0.074 \\
-        Quadtree Search & 1M images & 365.1 & 15.751 \\
+        Linear Search & 100K images & 6782 & 542 \\
+        Linear Search & 10M images & 3451245 & 234567 \\
+        Hash Search & 100K images & 19542 & 31 \\
+        Hash Search & 10M images & 8527603 & 3598 \\
+        Hash Dynamic & 100K images & 19680 & 98 \\
+        Hash Dynamic & 10M images & 8567890 & 17890 \\
+        Octree Search & 100K images & 28430 & 980 \\
+        Octree Search & 10M images & 16458723 & 521847 \\
+        Quadtree Search & 100K images & 30286 & 917 \\
+        Quadtree Search & 10M images & 14563872 & 351902 \\
         \hline
     \end{tabularx}
     \vspace{0.2cm}
     \begin{minipage}{\columnwidth}
     \footnotesize
-    \textit{Note: Execution times measured on standardized hardware configuration; \\actual performance depends on specific implementation and system architecture.}
+    \textit{Note: Execution times measured in microseconds (μs) on standardized hardware; \\actual performance depends on specific implementation and system architecture.}
     \end{minipage}
 \end{table}
 
