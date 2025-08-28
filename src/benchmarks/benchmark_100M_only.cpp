@@ -1,6 +1,6 @@
 /*
 =============================================================================
-BENCHMARK 100M APENAS - PAA Assignment 1 - TESTE ESPECÍFICO
+BENCHMARK 100M APENAS - PAA Assignment 1 - TESTE ESPECIFICO
 =============================================================================
 
 Testa apenas 100M imagens com ordem específica:
@@ -343,7 +343,7 @@ std::vector<Image> generateSyntheticDataset(int count) {
     std::vector<Image> images;
     images.reserve(count);
     
-    // SEED FIXA para consistência entre execuções
+    // SEED FIXA para consistencia entre execucões
     std::mt19937 gen(42);
     std::uniform_real_distribution<> colorDist(0.0, 255.0);
     
@@ -376,7 +376,7 @@ BenchmarkResult benchmarkStructure(std::unique_ptr<ImageDatabase> db,
     result.structureName = db->getName();
     result.datasetSize = dataset.size();
     
-    // Teste de Inserção
+    // Teste de Insercão
     auto startInsert = std::chrono::high_resolution_clock::now();
     for (const auto& img : dataset) {
         db->insert(img);
@@ -415,7 +415,7 @@ int main() {
     
     std::vector<BenchmarkResult> results;
     
-    // ORDEM ESPECÍFICA: Quadtree, Octree, Hash, Linear
+    // ORDEM ESPECIFICA: Quadtree, Octree, Hash, Linear
     std::vector<std::pair<std::string, std::function<std::unique_ptr<ImageDatabase>()>>> structures = {
         {"QuadtreeSearch", []() { return std::make_unique<QuadtreeSearch>(); }},
         {"OctreeSearch", []() { return std::make_unique<OctreeSearch>(); }},
