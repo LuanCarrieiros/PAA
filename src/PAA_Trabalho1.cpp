@@ -1,6 +1,6 @@
 /*
 =============================================================================
-CÓDIGO EDUCATIVO - PAA Assignment 1: Análise de 4 Estruturas de Dados
+            PAA Assignment 1: Análise de 4 Estruturas de Dados
 =============================================================================
 
 Este arquivo demonstra a implementação e análise comparativa de 4 estruturas
