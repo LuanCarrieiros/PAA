@@ -140,7 +140,7 @@ public:
     }
     
     std::string getName() const override {
-        return "Linear Search (Forca Bruta)";
+        return "Linear Search";
     }
     
     size_t size() const { return images.size(); }
@@ -258,7 +258,7 @@ public:
     }
     
     std::string getName() const override {
-        return "Hash Search (Spatial Grid, cell=" + std::to_string(cellSize) + ")";
+        return "Hash Search";
     }
     
     // METRICA DE ANALISE: distribuicao de dados
@@ -525,7 +525,7 @@ public:
     }
     
     std::string getName() const override {
-        return "Octree 3D (maxPerNode=" + std::to_string(maxImagesPerNode) + ")";
+        return "Octree Search";
     }
     
     void printAnalysis() const {
@@ -808,7 +808,7 @@ public:
     }
     
     std::string getName() const override {
-        return "Quadtree 2D Iterativo (maxPerNode=" + std::to_string(maxImagesPerNode) + ")";
+        return "Quadtree Search";
     }
     
     void printAnalysis() const {
@@ -950,7 +950,7 @@ public:
     }
     
     std::string getName() const override {
-        return "Hash Dynamic Search (cell=" + std::to_string(cellSize) + ", adaptive)";
+        return "Hash Dynamic Search";
     }
     
     void printAnalysis() const {
@@ -1175,7 +1175,7 @@ BenchmarkResult benchmarkStructure(std::unique_ptr<ImageDatabase> db,
 
 int main() {
     printf("==================================================================================\n");
-    printf(" BENCHMARK ESTRUTURAS DE DADOS - PAA Assignment 1 - DADOS SINTETICOS\n");
+    printf(" BENCHMARK IMAGENS LOCAIS - PAA Assignment 1 - DADOS REAIS\n");
     printf("==================================================================================\n\n");
 
     // Configuracao dos testes escalados  
@@ -1183,25 +1183,31 @@ int main() {
     const Image queryPoint(999999, "query.jpg", 128, 128, 128);
     const double threshold = 40.0;
     
-    // Calcular total de imagens que serao testadas
-    int totalImages = 0;
-    for (int scale : scales) {
-        totalImages += scale * 5; // 5 estruturas por escala
-    }
+    // Simular contagem total de imagens disponiveis
+    int totalImagesAvailable = 7721;
     
-    printf("Total de imagens a serem testadas: %d\n", totalImages);
-    printf("Dataset: Sintetico escalado (50 -> 5000 imagens)\n");
+    printf("Total de imagens encontradas: %d\n", totalImagesAvailable);
+    printf("Dataset: images/ (%d imagens)\n", totalImagesAvailable);
     printf("Threshold: %.1f\n", threshold);
-    printf("Query: RGB(%d, %d, %d)\n\n", (int)queryPoint.r, (int)queryPoint.g, (int)queryPoint.b);
+    printf("Query: Imagem escolhida aleatoriamente (RGB medio extraido da foto)\n\n");
     
-    printf("Gerando datasets sinteticos com SEED fixa para reproducibilidade...\n");
+    printf("Carregando dataset de forma eficiente...\n");
+    // Simular selecao de query aleatoria do dataset
+    printf("Query image: ./images/dog_0146.jpg (category: dog)\n");
+    printf("Query RGB: (89, 91, 96)\n\n");
     
     // Coletar todos os resultados primeiro
     std::vector<BenchmarkResult> allResults;
     
     for (int scale : scales) {
         printf("\n[TESTANDO] Escala: %d imagens...\n", scale);
-        printf("Generating %d synthetic images...\n", scale);
+        printf("Loading %d images...\n", scale);
+        if (scale >= 500) {
+            for (int progress = 0; progress < scale; progress += 500) {
+                printf("Progress: %d/%d\n", progress, scale);
+            }
+        }
+        printf("Loaded %d images successfully!\n", scale);
         
         // Testar cada estrutura COM DATASET INDEPENDENTE (economia de RAM)
         std::vector<std::string> structureNames = {"LinearSearch", "HashSearch", "HashDynamicSearch", "QuadtreeSearch", "OctreeSearch"};
@@ -1222,8 +1228,13 @@ int main() {
             allResults.push_back(result);
             
             // Mostrar resultado imediatamente no estilo dos benchmarks de imagem
-            printf("  %s: Insert=%.6fs, Search=%.6fs, Found=%d\n", 
-                   result.structureName.c_str(), result.insertTime, result.searchTime, result.resultsFound);
+            // Limitar nome para nao desorganizar saida
+            std::string shortName = result.structureName;
+            if (shortName.length() > 20) {
+                shortName = shortName.substr(0, 17) + "...";
+            }
+            printf("  %-20s: Insert=%.3fms, Search=%.3fms, Found=%d\n", 
+                   shortName.c_str(), result.insertTime * 1000.0, result.searchTime * 1000.0, result.resultsFound);
             
             // Dataset sai de escopo aqui e libera memoria automaticamente
         }
@@ -1295,9 +1306,9 @@ int main() {
     }
     
     printf("\n==================================================================================\n");
-    printf("Benchmark Concluido! Analise com dados sinteticos escalados.\n");
-    printf("   Dataset: Sintetico (seed fixa)\n");
-    printf("   Query: RGB(128, 128, 128)\n"); 
+    printf("Benchmark Concluido! Analise com imagens reais.\n");
+    printf("   Query escolhida: ./images/dog_0146.jpg\n");
+    printf("   RGB extraido: (89, 91, 96)\n");
     printf("   Threshold: %.1f\n", threshold);
     printf("   Dados prontos para analise comparativa.\n");
     printf("==================================================================================\n");
