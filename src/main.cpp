@@ -1227,32 +1227,32 @@ int main() {
     printf("RESULTADOS FINAIS - TABELA ORGANIZADA\n");
     printf("==================================================================================\n\n");
     
-    printf("Dataset        Estrutura               Insert(s)        Search(s)        Found\n");
+    printf("Dataset        Estrutura               Insert(ms)       Search(ms)       Found\n");
     printf("-------------------------------------------------------------------------------\n");
     
-    // Organizar resultados por escala
-    for (int scale : scales) {
-        bool firstForScale = true;
-        for (const auto& result : allResults) {
-            // Filtrar resultados desta escala (aproximacao baseada no timing)
-            if ((scale == 50 && result.insertTime < 0.02) ||
-                (scale == 100 && result.insertTime >= 0.02 && result.insertTime < 0.08) ||
-                (scale == 300 && result.insertTime >= 0.08 && result.insertTime < 0.15) ||
-                (scale == 500 && result.insertTime >= 0.15 && result.insertTime < 0.25) ||
-                (scale == 1000 && result.insertTime >= 0.25 && result.insertTime < 0.6) ||
-                (scale == 2000 && result.insertTime >= 0.6 && result.insertTime < 1.5) ||
-                (scale == 5000 && result.insertTime >= 1.5)) {
-                    
-                if (firstForScale) {
-                    printf("%-14d %-23s %12.6f %12.6f %12d\n", 
-                           scale, result.structureName.c_str(), 
-                           result.insertTime, result.searchTime, result.resultsFound);
-                    firstForScale = false;
-                } else {
-                    printf("%-14s %-23s %12.6f %12.6f %12d\n", 
-                           "", result.structureName.c_str(),
-                           result.insertTime, result.searchTime, result.resultsFound);
-                }
+    // Organizar resultados por escala em grupos de 5 estruturas
+    for (size_t i = 0; i < scales.size(); i++) {
+        int scale = scales[i];
+        
+        // Encontrar as 5 estruturas para esta escala
+        std::vector<BenchmarkResult> scaleResults;
+        for (size_t j = i * 5; j < (i + 1) * 5 && j < allResults.size(); j++) {
+            scaleResults.push_back(allResults[j]);
+        }
+        
+        // Imprimir primeira linha com o número da escala
+        if (!scaleResults.empty()) {
+            printf("%-14d %-23s %12.3f %12.3f %12d\n", 
+                   scale, scaleResults[0].structureName.c_str(), 
+                   scaleResults[0].insertTime * 1000.0, scaleResults[0].searchTime * 1000.0, 
+                   scaleResults[0].resultsFound);
+            
+            // Imprimir demais estruturas para esta escala
+            for (size_t k = 1; k < scaleResults.size(); k++) {
+                printf("%-14s %-23s %12.3f %12.3f %12d\n", 
+                       "", scaleResults[k].structureName.c_str(),
+                       scaleResults[k].insertTime * 1000.0, scaleResults[k].searchTime * 1000.0, 
+                       scaleResults[k].resultsFound);
             }
         }
         printf("-------------------------------------------------------------------------------\n");
@@ -1268,29 +1268,22 @@ int main() {
         double bestInsertTime = 999.0;
         double bestSearchTime = 999.0;
         
-        // Encontrar os melhores para esta escala
-        for (const auto& result : allResults) {
-            if ((scale == 50 && result.insertTime < 0.02) ||
-                (scale == 100 && result.insertTime >= 0.02 && result.insertTime < 0.08) ||
-                (scale == 300 && result.insertTime >= 0.08 && result.insertTime < 0.15) ||
-                (scale == 500 && result.insertTime >= 0.15 && result.insertTime < 0.25) ||
-                (scale == 1000 && result.insertTime >= 0.25 && result.insertTime < 0.6) ||
-                (scale == 2000 && result.insertTime >= 0.6 && result.insertTime < 1.5) ||
-                (scale == 5000 && result.insertTime >= 1.5)) {
-                
-                if (result.insertTime < bestInsertTime) {
-                    bestInsertTime = result.insertTime;
-                    bestInsert = result.structureName;
-                }
-                if (result.searchTime < bestSearchTime) {
-                    bestSearchTime = result.searchTime;
-                    bestSearch = result.structureName;
-                }
+        // Encontrar os melhores para esta escala (baseado no índice)
+        for (size_t j = i * 5; j < (i + 1) * 5 && j < allResults.size(); j++) {
+            const auto& result = allResults[j];
+            
+            if (result.insertTime < bestInsertTime) {
+                bestInsertTime = result.insertTime;
+                bestInsert = result.structureName;
+            }
+            if (result.searchTime < bestSearchTime) {
+                bestSearchTime = result.searchTime;
+                bestSearch = result.structureName;
             }
         }
         
-        printf("%-14d | Insert: %-20s (%.6fs) | Search: %-20s (%.6fs)\n",
-               scale, bestInsert.c_str(), bestInsertTime, bestSearch.c_str(), bestSearchTime);
+        printf("%-14d | Insert: %-20s (%.3fms) | Search: %-20s (%.3fms)\n",
+               scale, bestInsert.c_str(), bestInsertTime * 1000.0, bestSearch.c_str(), bestSearchTime * 1000.0);
     }
     
     printf("\n==================================================================================\n");
