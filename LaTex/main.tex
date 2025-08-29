@@ -183,7 +183,7 @@ This design ensures fair comparison by standardizing the interface while allowin
 
 \subsection{Memory Management Strategy}
 
-To prevent memory-related performance artifacts and enable testing with large datasets, we implemented a CREATE→TEST→DESTROY pattern using RAII principles with smart pointers. Each data structure is instantiated, tested, and destroyed independently, preventing memory pressure from affecting subsequent tests.
+To prevent memory-related performance artifacts and enable testing with large datasets, we implemented a CREATE$\rightarrow$TEST$\rightarrow$DESTROY pattern using RAII principles with smart pointers. Each data structure is instantiated, tested, and destroyed independently, preventing memory pressure from affecting subsequent tests.
 
 \subsection{Performance Measurement}
 
@@ -217,7 +217,7 @@ This section presents comprehensive experimental results demonstrating the perfo
 
 \subsection{Large-Scale Synthetic Performance}
 
-Table~\ref{tab:synthetic_performance} presents performance results for \textbf{synthetic datasets} ranging from 1,000 to 50 million images. \textbf{Important Note:} These large-scale experiments (1M, 50M images) utilize artificially generated synthetic data with controlled RGB distributions to enable scalability testing. In contrast, our real-world validation was conducted on actual image files limited to 7,721 natural images due to dataset availability constraints. The results reveal distinct performance profiles for each data structure.
+Table~\ref{tab:synthetic_performance_ms} presents performance results for \textbf{synthetic datasets} ranging from 1,000 to 50 million images. \textbf{Important Note:} These large-scale experiments (1M, 50M images) utilize artificially generated synthetic data with controlled RGB distributions to enable scalability testing. In contrast, our real-world validation was conducted on actual image files limited to 7,721 natural images due to dataset availability constraints. The results reveal distinct performance profiles for each data structure.
 
 \begin{table}[H]
     \footnotesize 
@@ -306,7 +306,7 @@ Our experiments reveal several unexpected findings that challenge conventional w
 
 \subsection{Computational Efficiency Analysis}
 
-Beyond visual quality assessment, computational efficiency represents a critical factor for practical applications. Table~\ref{tab:computational_efficiency} presents comparative execution times for different data structure configurations across varying dataset sizes.
+Beyond visual quality assessment, computational efficiency represents a critical factor for practical applications. Table~\ref{tab:computational_efficiency_us} presents comparative execution times for different data structure configurations across varying dataset sizes.
 
 \begin{table}[H]
     \footnotesize 
@@ -316,7 +316,7 @@ Beyond visual quality assessment, computational efficiency represents a critical
     \setlength{\tabcolsep}{4pt}
     \begin{tabularx}{\columnwidth}{ll >{\raggedleft\arraybackslash}X >{\raggedleft\arraybackslash}X}
         \toprule
-        \textbf{Data Structure} & \textbf{Dataset Size} & \textbf{Insertion (\textmu s)} & \textbf{Search (\textmu s)} \\ 
+        \textbf{Data Structure} & \textbf{Dataset Size} & \textbf{Insertion ($\mu$s)} & \textbf{Search ($\mu$s)} \\ 
         \midrule
         Linear Search   & 500 images    & 42  & 3  \\
         Linear Search   & 2500 images   & 210 & 15 \\
@@ -337,7 +337,7 @@ Beyond visual quality assessment, computational efficiency represents a critical
     \vspace{0.2cm}
     \begin{minipage}{\columnwidth}
     \footnotesize
-    \textit{Note: Execution times are in microseconds (\textmu s).}
+    \textit{Note: Execution times are in microseconds ($\mu$s).}
     \end{minipage}
 \end{table}
 
@@ -371,7 +371,7 @@ Our results demonstrate significant divergence between theoretical complexity pr
 
 \subsection{Implementation Impact}
 
-The CREATE→TEST→DESTROY memory management pattern proved crucial for large-scale evaluation, reducing memory consumption by over 70\% while improving cache performance. This finding emphasizes that implementation details can be as important as algorithmic choice for practical systems.
+The CREATE$\rightarrow$TEST$\rightarrow$DESTROY memory management pattern proved crucial for large-scale evaluation, reducing memory consumption by over 70\% while improving cache performance. This finding emphasizes that implementation details can be as important as algorithmic choice for practical systems.
 
 \subsection{Correlation and Trade-offs between Approaches}
 
@@ -406,7 +406,7 @@ This section details the individual contributions of each team member to the res
     
     \item \textbf{Bernardo Ferreira Temponi:} Implemented the basic Hash Search algorithm (spatial grid hashing), including the cell mapping and collision handling strategies. Contributed to the anti-cache strategy development and participated in the scalability analysis for large datasets. Assisted in the documentation and code organization aspects of the project.
     
-    \item \textbf{Arthur Gonçalves de Moraes:} Responsible for the optimization and benchmarking of iterative vs recursive implementations, particularly in the Quadtree structure analysis. Contributed to the memory management optimization strategies and participated in the development of the CREATE→TEST→DESTROY pattern. Assisted in the large-scale synthetic dataset generation and validation, and contributed to the statistical analysis of performance scaling behavior across different dataset sizes.
+    \item \textbf{Arthur Gonçalves de Moraes:} Responsible for the optimization and benchmarking of iterative vs recursive implementations, particularly in the Quadtree structure analysis. Contributed to the memory management optimization strategies and participated in the development of the CREATE$\rightarrow$TEST$\rightarrow$DESTROY pattern. Assisted in the large-scale synthetic dataset generation and validation, and contributed to the statistical analysis of performance scaling behavior across different dataset sizes.
 \end{itemize}
 
 All team members participated collaboratively in the experimental design, result interpretation, and manuscript preparation, ensuring comprehensive coverage of both theoretical foundations and practical implementation considerations.
