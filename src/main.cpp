@@ -1262,7 +1262,8 @@ int main() {
     printf("\nANALISE DE VENCEDORES POR ESCALA:\n");
     printf("==================================================================================\n");
     
-    for (int scale : scales) {
+    for (size_t i = 0; i < scales.size(); i++) {
+        int scale = scales[i];
         std::string bestInsert = "Linear Search";
         std::string bestSearch = "Hash Search";
         double bestInsertTime = 999.0;
