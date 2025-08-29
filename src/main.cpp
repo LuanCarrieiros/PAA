@@ -1,9 +1,9 @@
 /*
 =============================================================================
-            PAA Assignment 1: Análise de 5 Estruturas de Dados
+            PAA Assignment 1: Analise de 5 Estruturas de Dados
 =============================================================================
 
-Este arquivo demonstra a implementação e análise comparativa de 5 estruturas
+Este arquivo demonstra a implementacao e analise comparativa de 5 estruturas
 de dados para busca por similaridade em espaços multidimensionais (RGB):
 
 1. BUSCA LINEAR (Forca Bruta)
@@ -13,7 +13,7 @@ de dados para busca por similaridade em espaços multidimensionais (RGB):
 5. QUADTREE (Árvore Espacial 2D)
 
 Conceitos de PAA demonstrados:
-- Análise de Complexidade (Big O)
+- Analise de Complexidade (Big O)
 - Trade-offs entre Tempo e Espaço
 - Estruturas de Dados Espaciais
 - Algoritmos de Busca por Proximidade
@@ -77,7 +77,7 @@ class ImageDatabase {
 public:
     virtual ~ImageDatabase() = default;
     
-    // Operações fundamentais para análise de complexidade
+    // Operacoes fundamentais para analise de complexidade
     virtual void insert(const Image& img) = 0;
     virtual std::vector<Image> findSimilar(const Image& query, double threshold) = 0;
     virtual std::string getName() const = 0;
@@ -140,7 +140,7 @@ public:
     }
     
     std::string getName() const override {
-        return "Linear Search (Força Bruta)";
+        return "Linear Search (Forca Bruta)";
     }
     
     size_t size() const { return images.size(); }
@@ -1183,6 +1183,13 @@ int main() {
     const Image queryPoint(999999, "query.jpg", 128, 128, 128);
     const double threshold = 40.0;
     
+    // Calcular total de imagens que serao testadas
+    int totalImages = 0;
+    for (int scale : scales) {
+        totalImages += scale * 5; // 5 estruturas por escala
+    }
+    
+    printf("Total de imagens a serem testadas: %d\n", totalImages);
     printf("Dataset: Sintetico escalado (50 -> 5000 imagens)\n");
     printf("Threshold: %.1f\n", threshold);
     printf("Query: RGB(%d, %d, %d)\n\n", (int)queryPoint.r, (int)queryPoint.g, (int)queryPoint.b);
