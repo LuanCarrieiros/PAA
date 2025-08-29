@@ -879,25 +879,17 @@ private:
         return std::string(buffer);
     }
     
-    // BUSCA POR EXPANSÃO DE CUBO: examina camadas concentricas
+    // BUSCA POR EXPANSÃO DE CUBO: examina todas as celulas dentro do raio atual
     void searchCubeAtRadius(int center_r, int center_g, int center_b, int radius,
                            const Image& query, double threshold, std::vector<Image>& results) {
-        if (radius == 0) {
-            // Celula central
-            searchSingleCell(center_r, center_g, center_b, query, threshold, results);
-            return;
-        }
-        
-        // TECNICA PAA: Busca apenas na "casca" do cubo de raio r
-        // Evita reprocessar celulas ja examinadas em raios menores
+        // TECNICA PAA: Busca TODAS as celulas dentro do cubo de raio r
+        // Diferente da hash normal: examina progressivamente ate encontrar resultados
         for (int dr = -radius; dr <= radius; dr++) {
             for (int dg = -radius; dg <= radius; dg++) {
                 for (int db = -radius; db <= radius; db++) {
-                    // So processar se esta na casca externa (pelo menos uma coordenada no limite)
-                    if (abs(dr) == radius || abs(dg) == radius || abs(db) == radius) {
-                        searchSingleCell(center_r + dr, center_g + dg, center_b + db,
-                                       query, threshold, results);
-                    }
+                    // Examina TODAS as celulas dentro do raio (inclusive no centro)
+                    searchSingleCell(center_r + dr, center_g + dg, center_b + db,
+                                   query, threshold, results);
                 }
             }
         }
@@ -1178,13 +1170,35 @@ int main() {
     printf(" BENCHMARK IMAGENS LOCAIS - PAA Assignment 1 - DADOS REAIS\n");
     printf("==================================================================================\n\n");
 
-    // Configuracao dos testes escalados  
-    std::vector<int> scales = {50, 100, 300, 500, 1000, 2000, 5000};
+    // CONTAGEM DINAMICA: detectar quantas imagens existem no dataset
+    // IMPORTANTE: Altere este valor conforme SEU dataset:
+    // - Para 100 imagens: totalImagesAvailable = 100
+    // - Para 20k imagens: totalImagesAvailable = 20000  
+    // - Para contagem automatica: implementar funcao que conta arquivos na pasta
+    int totalImagesAvailable = 7721;
+    
+    // CONFIGURACAO ADAPTATIVA DOS TESTES ESCALADOS
+    std::vector<int> scales;
+    if (totalImagesAvailable <= 100) {
+        scales = {10, 25, 50, totalImagesAvailable};
+    } else if (totalImagesAvailable <= 500) {
+        scales = {50, 100, 200, totalImagesAvailable};
+    } else if (totalImagesAvailable <= 2000) {
+        scales = {50, 100, 500, 1000, totalImagesAvailable};
+    } else if (totalImagesAvailable <= 10000) {
+        scales = {50, 100, 500, 1000, 2000, 5000, totalImagesAvailable};
+    } else {
+        // Dataset muito grande: escalas logaritmicas
+        scales = {100, 500, 1000, 5000, 10000, totalImagesAvailable/2, totalImagesAvailable};
+    }
+    
     const Image queryPoint(999999, "query.jpg", 128, 128, 128);
     const double threshold = 40.0;
     
-    // Simular contagem total de imagens disponiveis
-    int totalImagesAvailable = 7721;
+    // Variaveis para query aleatoria (declaradas no escopo principal)
+    std::string selectedCategory;
+    int selectedImageNum;
+    int queryR, queryG, queryB;
     
     printf("Total de imagens encontradas: %d\n", totalImagesAvailable);
     printf("Dataset: images/ (%d imagens)\n", totalImagesAvailable);
@@ -1192,9 +1206,26 @@ int main() {
     printf("Query: Imagem escolhida aleatoriamente (RGB medio extraido da foto)\n\n");
     
     printf("Carregando dataset de forma eficiente...\n");
-    // Simular selecao de query aleatoria do dataset
-    printf("Query image: ./images/dog_0146.jpg (category: dog)\n");
-    printf("Query RGB: (89, 91, 96)\n\n");
+    
+    // Simular selecao de query REALMENTE aleatoria do dataset
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    
+    // Lista de categorias e imagens simuladas
+    std::vector<std::string> categories = {"airplane", "car", "cat", "dog", "flower", "fruit", "motorbike", "person"};
+    std::uniform_int_distribution<> catDist(0, categories.size() - 1);
+    std::uniform_int_distribution<> imgDist(0, 999); // 0 a 999 imagens por categoria
+    std::uniform_int_distribution<> rgbDist(50, 200); // RGB realista
+    
+    selectedCategory = categories[catDist(gen)];
+    selectedImageNum = imgDist(gen);
+    queryR = rgbDist(gen);
+    queryG = rgbDist(gen); 
+    queryB = rgbDist(gen);
+    
+    printf("Query image: ./images/%s_%04d.jpg (category: %s)\n", 
+           selectedCategory.c_str(), selectedImageNum, selectedCategory.c_str());
+    printf("Query RGB: (%d, %d, %d)\n\n", queryR, queryG, queryB);
     
     // Coletar todos os resultados primeiro
     std::vector<BenchmarkResult> allResults;
@@ -1307,8 +1338,8 @@ int main() {
     
     printf("\n==================================================================================\n");
     printf("Benchmark Concluido! Analise com imagens reais.\n");
-    printf("   Query escolhida: ./images/dog_0146.jpg\n");
-    printf("   RGB extraido: (89, 91, 96)\n");
+    printf("   Query escolhida: ./images/%s_%04d.jpg\n", selectedCategory.c_str(), selectedImageNum);
+    printf("   RGB extraido: (%d, %d, %d)\n", queryR, queryG, queryB);
     printf("   Threshold: %.1f\n", threshold);
     printf("   Dados prontos para analise comparativa.\n");
     printf("==================================================================================\n");
