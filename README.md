@@ -136,17 +136,21 @@ Implementation uses RAII (Resource Acquisition Is Initialization) with smart poi
 
 ### Compilation and Execution
 ```bash
-# Main educational demonstration
+# Main educational demonstration (5 structures comparison)
 g++ -O2 -std=c++17 -o main src/main.cpp
 ./main
 
-# Large-scale synthetic benchmark
+# Large-scale synthetic benchmark (100 → 50M images)
 g++ -O2 -o scalable src/benchmarks/scalable_benchmark.cpp
 ./scalable
 
 # Real image dataset evaluation (requires images/ directory)
-g++ -O2 -std=c++17 -o img_benchmark src/benchmarks/benchmark_imagens_simples.cpp
+g++ -O2 -std=c++17 -o img_benchmark benchmark_imagens_locais.exe
 ./img_benchmark
+
+# 100M images benchmark (extreme scale testing)
+g++ -O2 -o benchmark_100M src/benchmarks/benchmark_100M_only.cpp
+./benchmark_100M
 ```
 
 ## Future Research Directions
