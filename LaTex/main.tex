@@ -229,29 +229,31 @@ Table~\ref{tab:synthetic_performance} presents performance results for \textbf{s
 \begin{table}[H]
     \footnotesize 
     \centering
-    \caption{Performance Comparison on Synthetic Datasets (times in seconds)}
-    \label{tab:synthetic_performance}
-    \setlength{\tabcolsep}{4pt}
-    \begin{tabularx}{\columnwidth}{|l|c|c|c|c|c|c|}
-        \hline
-        \textbf{Algorithm} & \textbf{Operation} & \textbf{1K} & \textbf{10K} & \textbf{100K} & \textbf{1M} & \textbf{50M} \\
-        \hline
-        \multirow{2}{*}{Linear Search} & Insert & \textbf{0.000082} & \textbf{0.000750} & \textbf{0.006782} & \textbf{0.066646} & \textbf{5.752689} \\
-        & Search & 0.000005 & 0.000063 & 0.000542 & 0.007045 & 0.520698 \\
-        \hline
-        \multirow{2}{*}{Hash Search} & Insert & 0.000163 & 0.001811 & 0.019542 & 0.173945 & 42.529801 \\
-        & Search & \textbf{0.000001} & \textbf{0.000001} & \textbf{0.000031} & \textbf{0.000187} & \textbf{0.017987} \\
-        \hline
-        \multirow{2}{*}{Hash Dynamic} & Insert & 0.000165 & 0.001820 & 0.019680 & 0.174220 & 42.847132 \\
-        & Search & 0.000002 & 0.000011 & 0.000098 & 0.000445 & 0.089441 \\
-        \hline
-        \multirow{2}{*}{Octree Search} & Insert & 0.000227 & 0.002270 & 0.028430 & 0.477827 & 82.092444 \\
-        & Search & 0.000013 & 0.000088 & 0.000980 & 0.020957 & 2.603842 \\
-        \hline
-        \multirow{2}{*}{Quadtree Search} & Insert & 0.000148 & 0.002348 & 0.030286 & 0.365093 & 72.793606 \\
-        & Search & 0.000011 & 0.000074 & 0.000917 & 0.015751 & 1.759648 \\
-        \hline
-    \end{tabularx}
+    % Legenda atualizada para milissegundos
+    \caption{Performance Comparison on Synthetic Datasets (times in milliseconds)} 
+    \label{tab:synthetic_performance_ms}
+    \setlength{\tabcolsep}{3pt} 
+    \begin{tabular}{ll rrrrr} 
+        \toprule
+        \textbf{Algorithm} & \textbf{Op.} & \textbf{1K} & \textbf{10K} & \textbf{100K} & \textbf{1M} & \textbf{50M} \\
+        \midrule
+        % --- Valores abaixo estão TODOS convertidos para ms e arredondados ---
+        \multirow{2}{*}{Linear Search} & Insert & \textbf{0.08} & \textbf{0.75} & \textbf{6.78} & \textbf{66.65} & \textbf{5752.69} \\
+        & Search & 0.01 & 0.06 & 0.54 & 7.05 & 520.70 \\
+        \cmidrule(lr){2-7}
+        \multirow{2}{*}{Hash Search} & Insert & 0.16 & 1.81 & 19.54 & 173.95 & 42529.80 \\
+        & Search & \textbf{0.001} & \textbf{0.001} & \textbf{0.03} & \textbf{0.19} & \textbf{17.99} \\
+        \cmidrule(lr){2-7}
+        \multirow{2}{*}{Hash Dynamic} & Insert & 0.17 & 1.82 & 19.68 & 174.22 & 42847.13 \\
+        & Search & 0.002 & 0.01 & 0.10 & 0.45 & 89.44 \\
+        \cmidrule(lr){2-7}
+        \multirow{2}{*}{Octree Search} & Insert & 0.23 & 2.27 & 28.43 & 477.83 & 82092.44 \\
+        & Search & 0.01 & 0.09 & 0.98 & 20.96 & 2603.84 \\
+        \cmidrule(lr){2-7}
+        \multirow{2}{*}{Quadtree Search} & Insert & 0.15 & 2.35 & 30.29 & 365.09 & 72793.61 \\
+        & Search & 0.01 & 0.07 & 0.92 & 15.75 & 1759.65 \\
+        \bottomrule
+    \end{tabular}
     \vspace{0.2cm}
     \begin{minipage}{\columnwidth}
     \footnotesize
@@ -277,7 +279,8 @@ Real-world performance evaluation on 7,721 natural images reveals the precision-
     \caption{Precision Analysis on Real Image Dataset (7,721 total images)}
     \label{tab:precision_analysis}
     \setlength{\tabcolsep}{6pt}
-    \begin{tabularx}{\columnwidth}{|l|c|c|c|}
+    % MUDANÇA PRINCIPAL: l para a primeira coluna, e X centralizado para as outras
+    \begin{tabularx}{\columnwidth}{|l| >{\centering\arraybackslash}X | >{\centering\arraybackslash}X | >{\centering\arraybackslash}X |}
         \hline
         \textbf{Algorithm} & \textbf{500 Images} & \textbf{1000 Images} & \textbf{7721 Images} \\
         \hline
@@ -315,29 +318,33 @@ Beyond visual quality assessment, computational efficiency represents a critical
 \begin{table}[H]
     \footnotesize 
     \centering
-    \caption{Comparative Computational Efficiency Analysis (Various Dataset Sizes)}
-    \label{tab:computational_efficiency}
-    \setlength{\tabcolsep}{3pt}
-    \begin{tabularx}{\columnwidth}{|l|l|c|c|}
-        \hline
-        \textbf{Data Structure} & \textbf{Dataset Size} & \textbf{Insertion (s)} & \textbf{Search (s)} \\ 
-        \hline
-        Linear Search & 500 images & 0.000042 & 0.000003 \\
-        Linear Search & 2500 images & 0.000210 & 0.000015 \\
-        Hash Search & 500 images & 0.000081 & 0.000001 \\
-        Hash Search & 2500 images & 0.000405 & 0.000001 \\
-        Hash Dynamic & 500 images & 0.000083 & 0.000001 \\
-        Hash Dynamic & 2500 images & 0.000415 & 0.000005 \\
-        Octree Search & 500 images & 0.000114 & 0.000007 \\
-        Octree Search & 2500 images & 0.000570 & 0.000035 \\
-        Quadtree Search & 500 images & 0.000118 & 0.000006 \\
-        Quadtree Search & 2500 images & 0.000590 & 0.000030 \\
-        \hline
+    \caption{Comparative Computational Efficiency Analysis (times in microseconds)}
+    \label{tab:computational_efficiency_us}
+    \setlength{\tabcolsep}{4pt}
+    \begin{tabularx}{\columnwidth}{ll >{\raggedleft\arraybackslash}X >{\raggedleft\arraybackslash}X}
+        \toprule
+        \textbf{Data Structure} & \textbf{Dataset Size} & \textbf{Insertion (\textmu s)} & \textbf{Search (\textmu s)} \\ 
+        \midrule
+        Linear Search   & 500 images    & 42  & 3  \\
+        Linear Search   & 2500 images   & 210 & 15 \\
+        \addlinespace
+        Hash Search     & 500 images    & 81  & 1  \\
+        Hash Search     & 2500 images   & 405 & 1  \\
+        \addlinespace
+        Hash Dynamic    & 500 images    & 83  & 1  \\
+        Hash Dynamic    & 2500 images   & 415 & 5  \\
+        \addlinespace
+        Octree Search   & 500 images    & 114 & 7  \\
+        Octree Search   & 2500 images   & 570 & 35 \\
+        \addlinespace
+        Quadtree Search & 500 images    & 118 & 6  \\
+        Quadtree Search & 2500 images   & 590 & 30 \\
+        \bottomrule
     \end{tabularx}
     \vspace{0.2cm}
     \begin{minipage}{\columnwidth}
     \footnotesize
-    \textit{Note: Execution times measured in seconds (s) on standardized hardware; \\actual performance depends on specific implementation and system architecture.}
+    \textit{Note: Execution times are in microseconds (\textmu s).}
     \end{minipage}
 \end{table}
 
