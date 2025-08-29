@@ -1,8 +1,11 @@
-# PAA - Análise e Projeto de Algoritmos
+# Projeto e Análise de Algoritmos
 
-Este repositório contém os trabalhos desenvolvidos na disciplina de **Análise e Projeto de Algoritmos** da **PUC Minas**.
+**Instituição**: PUC Minas - Ciência da Computação  
+**Campus**: Coração Eucarístico  
+**Turno**: Manhã  
+**Período**: 2025/2
 
-**Autor**: Luan Barbosa Rosa Carrieiros
+Este repositório contém os trabalhos desenvolvidos na disciplina de **Projeto e Análise de Algoritmos**, organizados por módulos associados aos dias de aula conforme cronograma disponível no Canvas.
 
 ## 📂 Estrutura do Repositório
 
@@ -37,18 +40,25 @@ Será disponibilizado em breve...
 
 Cada trabalho possui instruções específicas de compilação e execução em sua respectiva pasta. Consulte o README individual de cada trabalho.
 
+## 📚 Conteúdo da Disciplina
+
+A disciplina aborda os seguintes tópicos principais:
+
+- **Visão geral do semestre e alguns conceitos**
+- **Revisão de grafos**
+- **Custo computacional e ordens de complexidade**
+- **Tratabilidade**
+- **Algoritmos Gulosos**
+- **Divisão e conquista**
+- **Programação dinâmica**
+- **Outras estratégias de projeto de algoritmos**
+
 ## 🔧 Tecnologias Utilizadas
 
 - **C++17** - Implementação dos algoritmos
 - **LaTeX** - Documentação acadêmica  
 - **Git** - Controle de versão
 - **GCC** - Compilação com otimizações
-
----
-
-**Disciplina**: Análise e Projeto de Algoritmos  
-**Instituição**: PUC Minas - Instituto de Ciências Exatas e Informática (ICEI)  
-**Período**: 2025
 
 ---
 
