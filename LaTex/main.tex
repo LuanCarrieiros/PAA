@@ -19,22 +19,15 @@
 \usepackage{subcaption} 
 \usepackage{tabularx}
 \usepackage{booktabs}
-\bibliography{references}
 
+% REMOVIDO O CONFLITO: biblatex vs natbib
+% O sbc2023.cls já carrega natbib, então usamos ele
+% \bibliography{references}
 
-
-% Configura o biblatex
-\usepackage[backend=biber, style=numeric, sorting=none]{biblatex}
-\addbibresource{refs.bib} % Carrega o arquivo .bib
-
-% Comando para evitar um aviso ou erro comum do biblatex com sbc2023 se o \cite já for quadrado
-\DeclareCiteCommand{\cite}
-  {\usebibmacro{prenote}}
-  {\usebibmacro{citeindex}%
-   \printtext[bibhyperref]{\printfield{labelprefix}\printfield{labelnumber}%
-     \ifbool{bbx@subentry}{}{\printfield{entryset}}}}
-  {\multicitedelim}
-  {\usebibmacro{postnote}}
+% REMOVIDAS as configurações conflitantes do biblatex:
+% \usepackage[backend=biber, style=numeric, sorting=none]{biblatex}
+% \addbibresource{refs.bib}
+% \DeclareCiteCommand{\cite}...
 
 % Cores personalizadas
 \definecolor{orcidlogo}{rgb}{0.37,0.48,0.13}
@@ -67,7 +60,7 @@
 
 \affil{\textbf{Bernardo Ferreira Temponi}~\href{https://orcid.org/0000-0001-4892-5537}{\textcolor{orcidlogo}{\aiOrcid}}~~[~\textbf{Pontifical Catholic University of Minas Gerais}~|\href{mailto:bernardo.temponi@sga.pucminas.br}{~\textbf{\textit{bernardo.temponi@sga.pucminas.br}}}~]}
 
-\affil{\textbf{[Nome Randomico]}~\href{https://orcid.org/0000-0001-3195-1605}{\textcolor{orcidlogo}{\aiOrcid}}~~[~\textbf{Pontifical Catholic University of Minas Gerais}~|\href{mailto:randomico.nome@sga.pucminas.br}{~\textbf{\textit{randomico.nome@sga.pucminas.br}}}~]}
+\affil{\textbf{Arthur Gonçalves de Moraes}~\href{https://orcid.org/0000-0001-3195-1605}{\textcolor{orcidlogo}{\aiOrcid}}~~[~\textbf{Pontifical Catholic University of Minas Gerais}~|\href{mailto:arthur.moraes@sga.pucminas.br}{~\textbf{\textit{arthur.moraes@sga.pucminas.br}}}~]}
 }
 
 \begin{document}
@@ -413,7 +406,7 @@ This section details the individual contributions of each team member to the res
     
     \item \textbf{Bernardo Ferreira Temponi:} Implemented the basic Hash Search algorithm (spatial grid hashing), including the cell mapping and collision handling strategies. Contributed to the anti-cache strategy development and participated in the scalability analysis for large datasets. Assisted in the documentation and code organization aspects of the project.
     
-    \item \textbf{[Nome Randomico]:} Additional team member contributing to various aspects of the research implementation and analysis, including support for experimental validation and results interpretation.
+    \item \textbf{Arthur Gonçalves de Moraes:} Responsible for the optimization and benchmarking of iterative vs recursive implementations, particularly in the Quadtree structure analysis. Contributed to the memory management optimization strategies and participated in the development of the CREATE→TEST→DESTROY pattern. Assisted in the large-scale synthetic dataset generation and validation, and contributed to the statistical analysis of performance scaling behavior across different dataset sizes.
 \end{itemize}
 
 All team members participated collaboratively in the experimental design, result interpretation, and manuscript preparation, ensuring comprehensive coverage of both theoretical foundations and practical implementation considerations.
@@ -427,8 +420,8 @@ Repository: \url{https://github.com/LuanCarrieiros/PAA}
 
 This provides full transparency and enables validation of our experimental results by the research community.
 
-% Lista todas as referências do arquivo .bib sem precisar de \cite
-\nocite{*} % Inclui todas as entradas do .bib
-\printbibliography[title={References}] % Imprime a bibliografia
+% BIBLIOGRAFIA COM NATBIB (já incluído no sbc2023.cls)
+\bibliographystyle{sbc}
+\bibliography{references}
 
 \end{document}
