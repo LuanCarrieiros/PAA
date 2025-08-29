@@ -1,253 +1,61 @@
-# Comparative Analysis of Data Structures for Image Similarity Search
+# PAA - Análise e Projeto de Algoritmos
 
-## Project Overview
+Este repositório contém os trabalhos desenvolvidos na disciplina de **Análise e Projeto de Algoritmos** da **PUC Minas**.
 
-**Institution**: PUC Minas - Algorithm Analysis and Design Course  
-**Assignment**: Empirical performance analysis of data structures for RGB image similarity search  
-**Language**: C++17 with compiler optimizations  
-**Date**: August 2025  
+## 👥 Equipe
 
-**Team Members**:
-- Luan Barbosa Rosa Carrieiros
-- Diego Moreira Rocha  
-- Iago Fereguetti Ribeiro
-- Bernardo Ferreira Temponi
-- Arthur Gonçalves de Moraes
+- **Luan Barbosa Rosa Carrieiros**
+- **Diego Moreira Rocha**  
+- **Iago Fereguetti Ribeiro**
+- **Bernardo Ferreira Temponi**
+- **Arthur Gonçalves de Moraes**
 
-## Research Objective
+## 📂 Estrutura do Repositório
 
-This study compares the performance characteristics of five distinct data structures for finding similar images based on RGB color space similarity:
+A disciplina contempla **3 trabalhos práticos** ao longo do semestre. Este repositório será atualizado conforme o desenvolvimento de cada trabalho.
 
-1. **Linear Search** - Sequential brute force approach
-2. **Hash Search** - 3D spatial hashing with grid-based indexing
-3. **Hash Dynamic Search** - Adaptive expansion spatial hashing
-4. **Octree Search** - 3D recursive spatial tree subdivision
-5. **Quadtree Search** - 2D spatial tree using R,G dimensions
+### [`Trabalho 1/`](./Trabalho%201/) - Análise Comparativa de Estruturas de Dados para Busca de Similaridade de Imagens RGB
 
-## Key Research Findings
+Estudo empírico comparativo de 5 estruturas de dados para busca de similaridade em imagens RGB:
 
-### Performance Champions by Category
+- **Linear Search** (baseline brute force)
+- **Hash Search** (hashing espacial 3D com grid)  
+- **Hash Dynamic Search** (expansão adaptativa)
+- **Octree Search** (árvore espacial 3D recursiva)
+- **Quadtree Search** (árvore espacial 2D)
 
-#### Insertion Performance
-**Winner**: Linear Search - Consistent dominance across all scales  
-**Advantage**: Zero structural overhead with direct array insertion  
-**Performance**: O(1) theoretical and practical complexity
+**Destaques do trabalho:**
+- ✅ Implementação em C++17 com otimizações
+- ✅ Benchmarks de 100 imagens → 50 milhões de imagens
+- ✅ Dataset real de 7.721 imagens naturais (8 categorias)
+- ✅ Análise de trade-offs precisão vs velocidade
+- ✅ Documentação LaTeX completa
 
-#### Search Performance  
-**Winner**: Hash Search - Superior performance for datasets >1K images  
-**Achievement**: 18ms search time for 50 million images  
-**Advantage**: O(1) spatial lookup with consistent scaling behavior
+### `Trabalho 2/` - *Em desenvolvimento*
+🚧 Será disponibilizado em breve...
 
-#### Precision vs Speed Trade-off
-**Discovery**: Hash-based structures sacrifice 5-15% accuracy for significant speed improvements  
-**Implication**: Choice depends on application requirements (speed vs completeness)
-
-### Unexpected Research Outcomes
-
-1. **2D vs 3D Trees**: Quadtree consistently outperformed Octree despite using fewer dimensions
-2. **Recursion Advantage**: Recursive implementations achieved 28-72% better performance than iterative versions
-3. **Scaling Behavior**: Hash structures maintained near-constant search times up to 50M images
-4. **Memory Impact**: Proper memory management reduced RAM consumption from 40GB to 12GB
-
-## Experimental Results
-
-### Large-Scale Synthetic Benchmark (100 → 50M images)
-
-| Scale | Linear (ms) | Hash (ms) | Hash Dynamic (ms) | Octree (ms) | Quadtree (ms) |
-|-------|-------------|-----------|-------------------|-------------|---------------|
-| 1K    | 0.082/0.005 | 0.163/**0.001** | 0.165/0.002 | 0.227/0.013 | 0.148/0.011 |
-| 10K   | 0.750/0.063 | 1.811/**0.001** | 1.820/0.011 | 2.270/0.088 | 2.348/0.074 |
-| 100K  | **6.782**/0.542 | 19.542/**0.031** | 19.680/0.098 | 28.430/0.980 | 30.286/0.917 |
-| 1M    | **66.646**/7.045 | 173.945/**0.187** | 174.220/0.445 | 477.827/20.957 | 365.093/15.751 |
-| 50M   | **5752.689**/520.698 | 42529.801/**17.987** | 42847.132/89.441 | 82092.444/2603.842 | 72793.606/1759.648 |
-
-*Format: Insertion/Search times in milliseconds*
-
-### Real Image Dataset Testing (7,721 images)
-
-Evaluation using natural images dataset with 8 categories (airplane, car, cat, dog, flower, fruit, motorbike, person):
-
-| Dataset Size | Linear Found | Hash Found | Hash Dynamic Found | Accuracy Ratio |
-|--------------|--------------|------------|-------------------|----------------|
-| 500          | 171          | 146        | 171               | 85.4% / 100%   |
-| 1000         | 357          | 307        | 357               | 86.0% / 100%   |
-| 7721         | 2858         | 2471       | 2858              | 86.5% / 100%   |
-
-**Key Insight**: Hash Dynamic Search achieves Linear Search precision while maintaining superior performance characteristics.
-
-## Research Methodology
-
-### Technical Configuration
-- **Compiler**: GCC with -O2 optimization flags
-- **Distance Metric**: Euclidean distance in RGB color space  
-- **Evaluation Query**: RGB(128, 128, 128) center point
-- **Similarity Threshold**: 50.0 units
-- **Timing Mechanism**: High-resolution chrono library
-
-### Experimental Design
-- **Memory Pattern**: CREATE→TEST→DESTROY to optimize RAM usage
-- **Anti-Cache Strategy**: Independent dataset generation per structure
-- **Reproducibility**: Fixed seed (20) for consistent synthetic data
-- **Scale Testing**: Logarithmic scaling from 100 to 50M images
-
-## Implementation Architecture
-
-### Core Design Patterns
-All data structures implement a unified `ImageDatabase` interface ensuring fair comparison:
-
-```cpp
-class ImageDatabase {
-public:
-    virtual void insert(const Image& img) = 0;
-    virtual std::vector<Image> findSimilar(const Image& query, double threshold) = 0;
-    virtual std::string getName() const = 0;
-};
-```
-
-### Memory Management Innovation
-Implementation uses RAII (Resource Acquisition Is Initialization) with smart pointers to prevent memory leaks and optimize resource usage during large-scale testing.
-
-## Theoretical vs Empirical Analysis
-
-| Structure | Insert Complexity | Search Complexity | Practical Performance |
-|-----------|-------------------|-------------------|----------------------|
-| Linear    | O(1)             | O(n)              | Excellent for <5K    |
-| Hash      | O(1)             | O(1)              | Outstanding for >1K   |
-| Hash Dynamic | O(1)          | O(r³)             | Precision-optimized  |
-| Octree    | O(log n)         | O(log n)          | High overhead        |
-| Quadtree  | O(log n)         | O(log n)          | Consistent scaling   |
-
-## Academic Contributions
-
-### Novel Findings
-1. **Dimensionality Paradox**: 2D spatial structures outperformed 3D equivalents
-2. **Memory-Performance Relationship**: Demonstrated critical impact of memory management on algorithmic performance
-3. **Precision-Speed Trade-off Quantification**: Empirical measurement of accuracy loss in approximate spatial structures
-
-### Research Applications
-- Computer vision similarity search optimization
-- Large-scale image database indexing strategies
-- Real-time image processing system design
-
-## Usage Instructions
-
-### Prerequisites
-- GCC compiler with C++17 support
-- Minimum 16GB RAM for large-scale testing
-
-### Important: Dataset Configuration
-Before running the image benchmarks, you need to configure both the image dataset path and size:
-
-1. **For Real Image Testing**: Place your image dataset in the `images/` folder in the project root, or modify the path in the code:
-   - Open `src/main.cpp` or the benchmark files
-   - Look for image loading paths (usually `./images/` or similar)
-   - Update to your actual image folder path:
-   ```cpp
-   // Example: Change this line in the code
-   std::string imagePath = "./images/";  // Default path
-   // To your custom path:
-   std::string imagePath = "/your/custom/path/to/images/";
-   ```
-
-2. **CRITICAL: Dataset Size Configuration**: You MUST update the total number of images for proper scaling:
-   - Open `src/main.cpp` 
-   - Find **line ~1178** with: `int totalImagesAvailable = 7721;`
-   - Change to your actual dataset size:
-   ```cpp
-   // Examples:
-   int totalImagesAvailable = 100;    // For 100 images
-   int totalImagesAvailable = 5000;   // For 5K images  
-   int totalImagesAvailable = 50000;  // For 50K images
-   ```
-   - The program automatically adapts test scales based on this value
-   - **Without this change, the benchmark may fail or test incorrect scales**
-
-3. **Image Format**: The code expects common image formats (JPG, PNG) and extracts RGB values from them.
-
-3. **Folder Structure**: Recommended structure:
-   ```
-   PAA/
-   ├── images/           ← Your image dataset goes here
-   │   ├── image1.jpg
-   │   ├── image2.png
-   │   └── ...
-   ├── src/
-   └── README.md
-   ```
-
-### Compilation and Execution
-```bash
-# Main educational demonstration (5 structures comparison)
-g++ -O2 -std=c++17 -o main src/main.cpp
-./main
-
-# Large-scale synthetic benchmark (100 → 50M images)
-g++ -O2 -o scalable src/benchmarks/scalable_benchmark.cpp
-./scalable
-
-# Real image dataset evaluation (requires images/ directory)
-g++ -O2 -std=c++17 -o img_benchmark benchmark_imagens_locais.exe
-./img_benchmark
-
-# 100M images benchmark (extreme scale testing)
-g++ -O2 -o benchmark_100M src/benchmarks/benchmark_100M_only.cpp
-./benchmark_100M
-```
-
-### Troubleshooting: Common Path Issues
-
-**Problem**: "Cannot find images" or "No images loaded"
-**Solution**: 
-1. Check if your images folder exists and has the correct permissions
-2. Verify the path in the code matches your actual folder location
-3. For Windows users: Use forward slashes (`/`) or escape backslashes (`\\\\`)
-
-**Examples of path modifications**:
-```cpp
-// Linux/Mac
-std::string imagePath = "/home/username/datasets/images/";
-
-// Windows (Option 1 - forward slashes)
-std::string imagePath = "C:/Users/YourName/Pictures/dataset/";
-
-// Windows (Option 2 - escaped backslashes)  
-std::string imagePath = "C:\\\\Users\\\\YourName\\\\Pictures\\\\dataset\\\\";
-
-// Relative path (recommended)
-std::string imagePath = "./images/";  // Images folder in project directory
-```
-
-**Note**: The current `main.cpp` simulates image loading for demonstration purposes. For actual image processing, use the specific benchmark files that include image loading functionality.
-
-## Future Research Directions
-
-### Planned Investigations
-1. **Alternative Distance Metrics**: Manhattan, Cosine similarity evaluation
-2. **Parallel Processing**: Multi-threading implementation analysis  
-3. **Dynamic Threshold Optimization**: Adaptive similarity boundary adjustment
-4. **Hybrid Approaches**: Combining multiple data structures for optimal performance
-
-### Technical Improvements
-- Cache-aware memory access patterns
-- GPU acceleration for large-scale processing
-- Advanced spatial partitioning algorithms
-
-## Conclusions
-
-### Academic Insights
-This research demonstrates that empirical analysis is essential for algorithmic selection in practical applications. Theoretical complexity analysis provides valuable guidance, but real-world performance characteristics often diverge from theoretical predictions due to implementation details, memory hierarchy effects, and constant factor variations.
-
-### Practical Recommendations
-- **Small datasets (<5K images)**: Linear Search for simplicity and performance
-- **Medium datasets (5K-1M images)**: Hash Search for optimal search performance
-- **Large datasets (>1M images)**: Selection based on precision requirements
-  - Speed priority: Hash Search
-  - Precision priority: Hash Dynamic Search
-  - Balanced approach: Quadtree
-
-### Key Research Impact
-This study provides quantitative evidence for the importance of empirical algorithm analysis and establishes performance benchmarks for image similarity search applications in computer science research and industry applications.
+### `Trabalho 3/` - *Planejado*
+🚧 Será disponibilizado em breve...
 
 ---
 
-*This research was conducted as part of the Algorithm Analysis and Design course at PUC Minas, contributing to the understanding of practical data structure performance in image processing applications.*
+## 🚀 Como usar cada trabalho
+
+Cada trabalho possui instruções específicas de compilação e execução em sua respectiva pasta. Consulte o README individual de cada trabalho.
+
+## 🔧 Tecnologias Utilizadas
+
+- **C++17** - Implementação dos algoritmos
+- **LaTeX** - Documentação acadêmica  
+- **Git** - Controle de versão
+- **GCC** - Compilação com otimizações
+
+---
+
+**Disciplina**: Análise e Projeto de Algoritmos  
+**Instituição**: PUC Minas - Instituto de Ciências Exatas e Informática (ICEI)  
+**Período**: 2025
+
+---
+
+*Este repositório está em desenvolvimento ativo. Os Trabalhos 2 e 3 serão adicionados conforme o progresso da disciplina.* 📚
