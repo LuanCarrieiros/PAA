@@ -12,6 +12,7 @@
 - Diego Moreira Rocha  
 - Iago Fereguetti Ribeiro
 - Bernardo Ferreira Temponi
+- Arthur Gonçalves de Moraes
 
 ## Research Objective
 
