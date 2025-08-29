@@ -2,13 +2,7 @@
 
 Este repositório contém os trabalhos desenvolvidos na disciplina de **Análise e Projeto de Algoritmos** da **PUC Minas**.
 
-## 👥 Equipe
-
-- **Luan Barbosa Rosa Carrieiros**
-- **Diego Moreira Rocha**  
-- **Iago Fereguetti Ribeiro**
-- **Bernardo Ferreira Temponi**
-- **Arthur Gonçalves de Moraes**
+**Autor**: Luan Barbosa Rosa Carrieiros
 
 ## 📂 Estrutura do Repositório
 
@@ -32,10 +26,10 @@ Estudo empírico comparativo de 5 estruturas de dados para busca de similaridade
 - ✅ Documentação LaTeX completa
 
 ### `Trabalho 2/` - *Em desenvolvimento*
-🚧 Será disponibilizado em breve...
+Será disponibilizado em breve...
 
 ### `Trabalho 3/` - *Planejado*
-🚧 Será disponibilizado em breve...
+Será disponibilizado em breve...
 
 ---
 
@@ -58,4 +52,4 @@ Cada trabalho possui instruções específicas de compilação e execução em s
 
 ---
 
-*Este repositório está em desenvolvimento ativo. Os Trabalhos 2 e 3 serão adicionados conforme o progresso da disciplina.* 📚
+*Este repositório está em desenvolvimento ativo. Os Trabalhos 2 e 3 serão adicionados conforme o progresso da disciplina.*
