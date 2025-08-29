@@ -29,7 +29,7 @@ PAA/
 
 ## ⚙️ Comandos de Compilação
 
-### **🎓 Código Educativo Principal**
+### **🎓 Código Principal**
 ```bash
 g++ -O2 -o main src/main.cpp
 ./main
@@ -40,13 +40,6 @@ g++ -O2 -o main src/main.cpp
 g++ -O2 -o scalable src/benchmarks/scalable_benchmark.cpp
 ./scalable
 # ⚠️ AVISO: Pode levar 30+ minutos para 50M imagens
-```
-
-### **📸 Benchmark com Imagens Reais **
-```bash
-g++ -O2 -std=c++17 -o img_benchmark src/benchmarks/benchmark_imagens_simples.cpp
-./img_benchmark
-# Requer: pasta Images/natural_images/ com imagens do Kaggle
 ```
 
 ### **🔄 Comparação Recursão vs Iteração**
