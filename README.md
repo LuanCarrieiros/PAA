@@ -135,6 +135,46 @@ Implementation uses RAII (Resource Acquisition Is Initialization) with smart poi
 - GCC compiler with C++17 support
 - Minimum 16GB RAM for large-scale testing
 
+### Important: Dataset Configuration
+Before running the image benchmarks, you need to configure both the image dataset path and size:
+
+1. **For Real Image Testing**: Place your image dataset in the `images/` folder in the project root, or modify the path in the code:
+   - Open `src/main.cpp` or the benchmark files
+   - Look for image loading paths (usually `./images/` or similar)
+   - Update to your actual image folder path:
+   ```cpp
+   // Example: Change this line in the code
+   std::string imagePath = "./images/";  // Default path
+   // To your custom path:
+   std::string imagePath = "/your/custom/path/to/images/";
+   ```
+
+2. **CRITICAL: Dataset Size Configuration**: You MUST update the total number of images for proper scaling:
+   - Open `src/main.cpp` 
+   - Find **line ~1178** with: `int totalImagesAvailable = 7721;`
+   - Change to your actual dataset size:
+   ```cpp
+   // Examples:
+   int totalImagesAvailable = 100;    // For 100 images
+   int totalImagesAvailable = 5000;   // For 5K images  
+   int totalImagesAvailable = 50000;  // For 50K images
+   ```
+   - The program automatically adapts test scales based on this value
+   - **Without this change, the benchmark may fail or test incorrect scales**
+
+3. **Image Format**: The code expects common image formats (JPG, PNG) and extracts RGB values from them.
+
+3. **Folder Structure**: Recommended structure:
+   ```
+   PAA/
+   ├── images/           ← Your image dataset goes here
+   │   ├── image1.jpg
+   │   ├── image2.png
+   │   └── ...
+   ├── src/
+   └── README.md
+   ```
+
 ### Compilation and Execution
 ```bash
 # Main educational demonstration (5 structures comparison)
@@ -153,6 +193,31 @@ g++ -O2 -std=c++17 -o img_benchmark benchmark_imagens_locais.exe
 g++ -O2 -o benchmark_100M src/benchmarks/benchmark_100M_only.cpp
 ./benchmark_100M
 ```
+
+### Troubleshooting: Common Path Issues
+
+**Problem**: "Cannot find images" or "No images loaded"
+**Solution**: 
+1. Check if your images folder exists and has the correct permissions
+2. Verify the path in the code matches your actual folder location
+3. For Windows users: Use forward slashes (`/`) or escape backslashes (`\\\\`)
+
+**Examples of path modifications**:
+```cpp
+// Linux/Mac
+std::string imagePath = "/home/username/datasets/images/";
+
+// Windows (Option 1 - forward slashes)
+std::string imagePath = "C:/Users/YourName/Pictures/dataset/";
+
+// Windows (Option 2 - escaped backslashes)  
+std::string imagePath = "C:\\\\Users\\\\YourName\\\\Pictures\\\\dataset\\\\";
+
+// Relative path (recommended)
+std::string imagePath = "./images/";  // Images folder in project directory
+```
+
+**Note**: The current `main.cpp` simulates image loading for demonstration purposes. For actual image processing, use the specific benchmark files that include image loading functionality.
 
 ## Future Research Directions
 
