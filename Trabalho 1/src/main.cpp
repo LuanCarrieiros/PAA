@@ -995,7 +995,7 @@ RealRGB extractRealRGBFromImage(const std::string& imagePath) {
         
         std::ifstream file(imagePath, std::ios::binary | std::ios::ate);
         if (!file.is_open()) {
-            std::cout << "ERRO: Não foi possível abrir " << imagePath << std::endl;
+            std::cout << "ERRO: Nao foi possivel abrir " << imagePath << std::endl;
             return RealRGB(0, 0, 0, false);
         }
         
@@ -1019,7 +1019,7 @@ RealRGB extractRealRGBFromImage(const std::string& imagePath) {
         return RealRGB(r, g, b, true);
         
     } catch (const std::exception& e) {
-        std::cout << "ERRO na extração: " << e.what() << std::endl;
+        std::cout << "ERRO na extracao: " << e.what() << std::endl;
         return RealRGB(0, 0, 0, false);
     }
 }
@@ -1060,7 +1060,7 @@ std::vector<Image> loadRealDataset(int maxCount, const std::string& path = "./im
                             std::cout << "Processadas " << imageId << " imagens reais..." << std::endl;
                         }
                     } else {
-                        std::cout << "AVISO: Ignorando imagem inválida: " << filename << std::endl;
+                        std::cout << "AVISO: Ignorando imagem invalida: " << filename << std::endl;
                     }
                 }
             }
