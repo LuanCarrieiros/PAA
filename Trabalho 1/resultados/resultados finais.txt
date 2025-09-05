@@ -1,0 +1,59 @@
+==================================================================================
+RESULTADOS FINAIS - TABELA ORGANIZADA
+==================================================================================
+
+Dataset        Estrutura               Insert(ms)       Search(ms)       Found
+-------------------------------------------------------------------------------
+10000          Linear Search                  0.972        0.060          141
+               Hash Search                    2.477        0.069          141
+               Hash Dynamic Search            2.965        0.137          272
+               Quadtree Search               15.532        0.149          869
+               Octree Search                  7.956        0.359          141
+-------------------------------------------------------------------------------
+25000          Linear Search                  3.601        0.156          351
+               Hash Search                    6.125        0.206          351
+               Hash Dynamic Search           11.504        0.353          673
+               Quadtree Search               42.564        0.523         1820
+               Octree Search                 21.216        1.205          351
+-------------------------------------------------------------------------------
+50000          Linear Search                  3.953        0.297          725
+               Hash Search                   10.923        0.158          725
+               Hash Dynamic Search           12.868        0.325         1411
+               Quadtree Search               62.730        0.692         3209
+               Octree Search                 41.887        2.146          725
+-------------------------------------------------------------------------------
+100000         Linear Search                  7.985        0.584         1449
+               Hash Search                   20.552        0.379         1449
+               Hash Dynamic Search           26.379        0.732         2824
+               Quadtree Search              147.081        1.709         6166
+               Octree Search                 97.042        5.613         1449
+-------------------------------------------------------------------------------
+150000         Linear Search                 17.195        1.174         2200
+               Hash Search                   30.275        0.700         2200
+               Hash Dynamic Search           41.710        1.316         4295
+               Quadtree Search              194.338        2.397         9030
+               Octree Search                161.143       12.231         2200
+-------------------------------------------------------------------------------
+206404         Linear Search                 20.487        1.376         3051
+               Hash Search                   41.332        0.791         3051
+               Hash Dynamic Search           56.471        1.650         5970
+               Quadtree Search              270.934        3.249        12993
+               Octree Search                339.644       23.145         3051
+-------------------------------------------------------------------------------
+
+ANALISE DE VENCEDORES POR ESCALA:
+==================================================================================
+10000          | Insert: Linear Search        (0.972ms) | Search: Linear Search        (0.060ms)
+25000          | Insert: Linear Search        (3.601ms) | Search: Linear Search        (0.156ms)
+50000          | Insert: Linear Search        (3.953ms) | Search: Hash Search          (0.158ms)
+100000         | Insert: Linear Search        (7.985ms) | Search: Hash Search          (0.379ms)
+150000         | Insert: Linear Search        (17.195ms) | Search: Hash Search          (0.700ms)
+206404         | Insert: Linear Search        (20.487ms) | Search: Hash Search          (0.791ms)
+
+==================================================================================
+Benchmark Concluido! Analise com dataset de imagens reais.
+   Query FIXA: ./query/query.jpg
+   RGB extraido: (66, 35, 226)
+   Threshold: 40.0
+   Dados prontos para analise comparativa.
+==================================================================================
