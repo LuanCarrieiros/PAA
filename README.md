@@ -7,7 +7,7 @@
 
 Este repositório contém os trabalhos desenvolvidos na disciplina de **Projeto e Análise de Algoritmos**, organizados por módulos associados aos dias de aula conforme cronograma disponível no Canvas.
 
-## 📂 Estrutura do Repositório
+## 📁 Estrutura do Repositório
 
 A disciplina contempla **3 trabalhos práticos** ao longo do semestre. Este repositório será atualizado conforme o desenvolvimento de cada trabalho.
 
@@ -23,10 +23,11 @@ Estudo empírico comparativo de 5 estruturas de dados para busca de similaridade
 
 **Destaques do trabalho:**
 - ✅ Implementação em C++17 com otimizações
-- ✅ Benchmarks de 100 imagens → 50 milhões de imagens
-- ✅ Dataset real de 7.721 imagens naturais (8 categorias)
+- ✅ Benchmarks de 10K → 206K imagens reais  
+- ✅ Dataset real com extração RGB baseada em arquivo
 - ✅ Análise de trade-offs precisão vs velocidade
-- ✅ Documentação LaTeX completa
+- ✅ Documentação LaTeX completa (4 páginas)
+- 📊 **Resultados**: Hash Search domina buscas (0.791ms), Linear Search domina inserções (20.487ms)
 
 ### `Trabalho 2/` - *Em desenvolvimento*
 Será disponibilizado em breve...
@@ -40,7 +41,7 @@ Será disponibilizado em breve...
 
 Cada trabalho possui instruções específicas de compilação e execução em sua respectiva pasta. Consulte o README individual de cada trabalho.
 
-## 📚 Conteúdo da Disciplina
+## Conteúdo da Disciplina
 
 A disciplina aborda os seguintes tópicos principais:
 
@@ -53,7 +54,7 @@ A disciplina aborda os seguintes tópicos principais:
 - **Programação dinâmica**
 - **Outras estratégias de projeto de algoritmos**
 
-## 🔧 Tecnologias Utilizadas
+## ⚙️ Tecnologias Utilizadas
 
 - **C++17** - Implementação dos algoritmos
 - **LaTeX** - Documentação acadêmica  
