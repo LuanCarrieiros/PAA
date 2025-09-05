@@ -74,7 +74,7 @@ PUC Minas, Instituto de Ciências Exatas e Informática (ICEI), Av. Dom José Ga
 
 \begin{abstract}
 \textbf{Abstract.} \\
-Image similarity search in RGB color space represents a fundamental challenge in computer vision and database systems, requiring efficient data structures to balance search performance with precision requirements. This paper presents a comprehensive empirical analysis of five distinct data structures for RGB image similarity search: \textbf{(i)} Linear Search (brute force baseline), \textbf{(ii)} Hash Search (3D spatial grid hashing), \textbf{(iii)} Hash Dynamic Search (adaptive expansion spatial hashing), \textbf{(iv)} Octree Search (3D recursive spatial tree), and \textbf{(v)} Quadtree Search (2D spatial tree projection). The algorithms were implemented in C++17 with compiler optimizations to ensure fair performance comparison. Extensive experiments were conducted on real image collections (206,404 natural images) using Euclidean distance in RGB space with a similarity threshold of 40.0. Results reveal distinct performance profiles across dataset scales, with Hash Search achieving superior search performance while Linear Search dominates insertion operations. Unexpectedly, 2D spatial structures (Quadtree) consistently found more similar images than 3D equivalents (Octree), and hash-based methods demonstrated significant precision variations. The study provides quantitative evidence for practical algorithm selection in image similarity applications and establishes performance benchmarks for RGB similarity search systems using real-world datasets.
+Image similarity search in RGB color space represents a fundamental challenge in computer vision and database systems, requiring efficient data structures to balance search performance with precision requirements. This paper presents a comprehensive empirical analysis of five distinct data structures for RGB image similarity search: \textbf{(i)} Linear Search (brute force baseline), \textbf{(ii)} Hash Search (3D spatial grid hashing), \textbf{(iii)} Hash Dynamic Search (adaptive expansion spatial hashing), \textbf{(iv)} Octree Search (3D recursive spatial tree), and \textbf{(v)} Quadtree Search (2D spatial tree projection). The algorithms were implemented in C++17 with compiler optimizations to ensure fair performance comparison. Extensive experiments were conducted on real image collections (206,395 natural images) using Euclidean distance in RGB space with a similarity threshold of 40.0. Results reveal distinct performance profiles across dataset scales, with Hash Search achieving superior search performance while Linear Search dominates insertion operations. Unexpectedly, 2D spatial structures (Quadtree) consistently found more similar images than 3D equivalents (Octree), and hash-based methods demonstrated significant precision variations. The study provides quantitative evidence for practical algorithm selection in image similarity applications and establishes performance benchmarks for RGB similarity search systems using real-world datasets.
 \end{abstract}
 
 \begin{keywords}
@@ -91,7 +91,7 @@ Image similarity search in high-dimensional color spaces is a cornerstone proble
 
 Traditional approaches range from brute force linear search, which guarantees complete recall but suffers from linear time complexity, to sophisticated spatial indexing techniques that exploit the geometric properties of color space. Hash-based methods offer promising constant-time access patterns, while tree structures provide logarithmic search complexity with spatial locality advantages. However, the practical performance of these approaches in real-world scenarios often deviates significantly from theoretical predictions due to implementation details, memory hierarchy effects, and data distribution characteristics.
 
-In this study, we present a comprehensive empirical analysis of five fundamental data structures for RGB image similarity search: Linear Search, Hash Search, Hash Dynamic Search, Octree Search, and Quadtree Search. Each algorithm was implemented in C++17 with careful attention to performance optimization and fair comparison methodology. Our experimental evaluation was conducted on real-world image collections spanning multiple scales (100 to 206,404 images), providing insights into the practical trade-offs between search speed, insertion performance, memory consumption, and precision in realistic scenarios.
+In this study, we present a comprehensive empirical analysis of five fundamental data structures for RGB image similarity search: Linear Search, Hash Search, Hash Dynamic Search, Octree Search, and Quadtree Search. Each algorithm was implemented in C++17 with careful attention to performance optimization and fair comparison methodology. Our experimental evaluation was conducted on real-world image collections spanning multiple scales (10K to 206,395 images), providing insights into the practical trade-offs between search speed, insertion performance, memory consumption, and precision in realistic scenarios.
 
 \section{Theoretical Background and Methodology}
 \label{sec:methodology}
@@ -111,7 +111,7 @@ Our evaluation uses threshold $\tau = 40.0$ and compares five distinct data stru
 
 \subsection{Experimental Setup}
 
-C++17 unified interface, CREATE→TEST→DESTROY pattern. Real datasets (100-206K images), filename hashing. Query: RGB(61,54,232), $\tau = 40.0$.
+C++17 unified interface, CREATE→TEST→DESTROY pattern. Real datasets (10K-206K images), file-based RGB extraction. Query: RGB(66,35,226), $\tau = 40.0$.
 
 
 \section{Results and Analysis}
@@ -121,7 +121,7 @@ This section presents comprehensive experimental results demonstrating the perfo
 
 \subsection{Performance Analysis Across Dataset Scales}
 
-Table~\ref{tab:real_performance_ms} presents comprehensive performance results for \textbf{real image datasets} across multiple scales from 100 to 206,404 images. All experiments were conducted using actual image files from the local dataset with RGB values extracted through deterministic hashing of filenames to ensure reproducibility. The results reveal distinct performance profiles and precision characteristics for each data structure.
+Table~\ref{tab:real_performance_ms} presents comprehensive performance results for \textbf{real image datasets} across multiple scales from 10K to 206,395 images. All experiments were conducted using actual image files from the local dataset with RGB values extracted through file-based processing to ensure reproducibility. The results reveal distinct performance profiles and precision characteristics for each data structure.
 
 \begin{table}[H]
     \footnotesize 
@@ -133,35 +133,35 @@ Table~\ref{tab:real_performance_ms} presents comprehensive performance results f
         \toprule
         \textbf{Algorithm} & \textbf{Op.} & \textbf{10K} & \textbf{25K} & \textbf{50K} & \textbf{100K} & \textbf{150K} & \textbf{206K} \\
         \midrule
-        \multirow{2}{*}{Linear Search} & Insert & \textbf{1.039} & \textbf{2.203} & \textbf{3.840} & \textbf{6.720} & \textbf{13.830} & \textbf{16.271} \\
-        & Search & 0.080 & 0.150 & 0.278 & 0.572 & 0.944 & 1.306 \\
+        \multirow{2}{*}{Linear Search} & Insert & \textbf{0.972} & \textbf{3.601} & \textbf{3.953} & \textbf{7.985} & \textbf{17.195} & \textbf{20.487} \\
+        & Search & \textbf{0.060} & 0.156 & 0.297 & 0.584 & 1.174 & 1.376 \\
         \cmidrule(lr){2-8}
-        \multirow{2}{*}{Hash Search} & Insert & 2.289 & 5.360 & 10.570 & 20.376 & 30.206 & 43.389 \\
-        & Search & \textbf{0.067} & \textbf{0.108} & \textbf{0.170} & \textbf{0.351} & \textbf{0.611} & \textbf{0.825} \\
+        \multirow{2}{*}{Hash Search} & Insert & 2.477 & 6.125 & 10.923 & 20.552 & 30.275 & 41.332 \\
+        & Search & 0.069 & \textbf{0.206} & \textbf{0.158} & \textbf{0.379} & \textbf{0.700} & \textbf{0.791} \\
         \cmidrule(lr){2-8}
-        \multirow{2}{*}{Hash Dynamic} & Insert & 3.241 & 7.357 & 13.533 & 30.329 & 41.461 & 79.060 \\
-        & Search & 0.142 & 0.200 & 0.305 & 0.743 & 1.238 & 1.775 \\
+        \multirow{2}{*}{Hash Dynamic} & Insert & 2.965 & 11.504 & 12.868 & 26.379 & 41.710 & 56.471 \\
+        & Search & 0.137 & 0.353 & 0.325 & 0.732 & 1.316 & 1.650 \\
         \cmidrule(lr){2-8}
-        \multirow{2}{*}{Quadtree Search} & Insert & 15.351 & 35.831 & 64.118 & 132.287 & 197.694 & 283.429 \\
-        & Search & 0.144 & 0.395 & 0.783 & 1.750 & 2.393 & 4.069 \\
+        \multirow{2}{*}{Quadtree Search} & Insert & 15.532 & 42.564 & 62.730 & 147.081 & 194.338 & 270.934 \\
+        & Search & 0.149 & 0.523 & 0.692 & 1.709 & 2.397 & 3.249 \\
         \cmidrule(lr){2-8}
-        \multirow{2}{*}{Octree Search} & Insert & 7.582 & 25.378 & 43.309 & 95.303 & 178.768 & 246.663 \\
-        & Search & 0.371 & 1.356 & 3.389 & 7.431 & 14.224 & 18.614 \\
+        \multirow{2}{*}{Octree Search} & Insert & 7.956 & 21.216 & 41.887 & 97.042 & 161.143 & 339.644 \\
+        & Search & 0.359 & 1.205 & 2.146 & 5.613 & 12.231 & 23.145 \\
         \bottomrule
     \end{tabular}
     \vspace{0.2cm}
     \begin{minipage}{\columnwidth}
     \footnotesize
-    \textit{Bold values indicate best performance in each category (Insert/Search) per scale. 206K represents the full dataset of 206,404 images.}
+    \textit{Bold values indicate best performance in each category (Insert/Search) per scale. 206K represents the full dataset of 206,395 images.}
     \end{minipage}
 \end{table}
 
 \textbf{Key Performance Findings:}
 
 \begin{itemize}
-    \item \textbf{Insertion Dominance:} Linear Search consistently achieves the fastest insertion times across all scales, demonstrating the efficiency of direct array append operations (16.271ms for 206K images).
-    \item \textbf{Search Leadership:} Hash Search dominates search performance across all scales, achieving 0.825ms search time for the complete 206,404 image collection, representing 1.58× faster performance than Linear Search (1.306ms).
-    \item \textbf{Scalability Patterns:} Tree structures show significantly higher insertion overhead (283.429ms for Quadtree, 246.663ms for Octree) with Octree exhibiting severe search performance degradation at scale (18.614ms vs 0.825ms for Hash—22.6× slower).
+    \item \textbf{Insertion Dominance:} Linear Search consistently achieves the fastest insertion times across all scales, demonstrating the efficiency of direct array append operations (20.487ms for 206K images).
+    \item \textbf{Search Leadership:} Hash Search dominates search performance across all scales, achieving 0.791ms search time for the complete 206,395 image collection, representing 1.74× faster performance than Linear Search (1.376ms).
+    \item \textbf{Scalability Patterns:} Tree structures show significantly higher insertion overhead (270.934ms for Quadtree, 339.644ms for Octree) with Octree exhibiting severe search performance degradation at scale (23.145ms vs 0.791ms for Hash—29.3× slower).
 \end{itemize}
 
 \subsection{Precision and Result Quality Analysis}
@@ -178,11 +178,11 @@ Beyond performance metrics, the number of similar images found reveals critical 
         \toprule
         \textbf{Algorithm} & \textbf{10K} & \textbf{25K} & \textbf{50K} & \textbf{100K} & \textbf{150K} & \textbf{206K} \\
         \midrule
-        Linear Search & 147 & 357 & 728 & 1465 & 2213 & 3036 \\
-        Hash Search & 147 & 357 & 728 & 1465 & 2213 & 3036 \\
-        Hash Dynamic Search & 292 & 706 & 1454 & 2912 & 4392 & 6013 \\
-        Quadtree Search & 878 & 1902 & 4029 & 7464 & 9280 & 14070 \\
-        Octree Search & 147 & 357 & 728 & 1465 & 2213 & 3036 \\
+        Linear Search & 141 & 351 & 725 & 1449 & 2200 & 3051 \\
+        Hash Search & 141 & 351 & 725 & 1449 & 2200 & 3051 \\
+        Hash Dynamic Search & 272 & 673 & 1411 & 2824 & 4295 & 5970 \\
+        Quadtree Search & 869 & 1820 & 3209 & 6166 & 9030 & 12993 \\
+        Octree Search & 141 & 351 & 725 & 1449 & 2200 & 3051 \\
         \bottomrule
     \end{tabularx}
     \vspace{0.2cm}
@@ -195,10 +195,10 @@ Beyond performance metrics, the number of similar images found reveals critical 
 \textbf{Precision Analysis Findings:}
 
 \begin{itemize}
-    \item \textbf{Ground Truth Accuracy:} Linear Search, Hash Search, and Octree Search achieve identical precision (3036 results for 206K dataset), confirming correct threshold application and algorithmic equivalence.
-    \item \textbf{Hash Dynamic Overestimation:} Consistently finds approximately 2× more images (6013 vs 3036), indicating systematic expansion of similarity criteria through adaptive cell coverage.
-    \item \textbf{Quadtree Severe Over-inclusion:} Dramatically overestimates similarity with 4.63× inflation (14070 vs 3036 results), demonstrating fundamental limitations of 2D projection for 3D similarity problems.
-    \item \textbf{Scale-Dependent Amplification:} Precision differences become exponentially pronounced with larger datasets—Quadtree jumps from 14 to 878 results between 1K-10K scales, highlighting severe algorithmic degradation.
+    \item \textbf{Ground Truth Accuracy:} Linear Search, Hash Search, and Octree Search achieve identical precision (3051 results for 206K dataset), confirming correct threshold application and algorithmic equivalence.
+    \item \textbf{Hash Dynamic Overestimation:} Consistently finds approximately 1.96× more images (5970 vs 3051), indicating systematic expansion of similarity criteria through adaptive cell coverage.
+    \item \textbf{Quadtree Severe Over-inclusion:} Dramatically overestimates similarity with 4.26× inflation (12993 vs 3051 results), demonstrating fundamental limitations of 2D projection for 3D similarity problems.
+    \item \textbf{Scale-Dependent Amplification:} Precision differences become exponentially pronounced with larger datasets—Quadtree jumps from 141 to 869 results between 10K scales, highlighting severe algorithmic degradation.
 \end{itemize}
 
 \subsection{Algorithmic Trade-offs Analysis}
@@ -206,10 +206,10 @@ Beyond performance metrics, the number of similar images found reveals critical 
 Our real-world experiments reveal several critical findings that inform practical algorithm selection decisions:
 
 \begin{itemize}
-    \item \textbf{Precision vs Performance Trade-off:} While Linear Search, Hash Search, and Octree maintain identical precision (3036 results), Hash Dynamic and Quadtree exhibit different behaviors—Hash Dynamic finds 2× more images while Quadtree finds 4.6× more, indicating varying similarity interpretation.
+    \item \textbf{Precision vs Performance Trade-off:} While Linear Search, Hash Search, and Octree maintain identical precision (3051 results), Hash Dynamic and Quadtree exhibit different behaviors—Hash Dynamic finds 1.96× more images while Quadtree finds 4.26× more, indicating varying similarity interpretation.
     \item \textbf{2D Projection Effects:} Quadtree's 2D spatial indexing (using only R,G dimensions) leads to significant over-inclusion of results, demonstrating the limitations of dimensional reduction in similarity search.
-    \item \textbf{Scalability Patterns:} Hash Search achieves superior scalability with sub-millisecond search times even for 206,404 images, while maintaining exact precision match with ground truth Linear Search.
-    \item \textbf{Implementation Efficiency:} Tree structures incur significant construction overhead (283.429ms for Quadtree vs 16.271ms for Linear Search) but may justify this cost in scenarios requiring repeated queries.
+    \item \textbf{Scalability Patterns:} Hash Search achieves superior scalability with sub-millisecond search times even for 206,395 images, while maintaining exact precision match with ground truth Linear Search.
+    \item \textbf{Implementation Efficiency:} Tree structures incur significant construction overhead (270.934ms for Quadtree vs 20.487ms for Linear Search) but may justify this cost in scenarios requiring repeated queries.
 \end{itemize}
 
 \section{Discussion}
@@ -268,7 +268,7 @@ Memory access patterns significantly influence performance rankings. Linear Sear
 \section{Conclusion and Future Work}
 \label{sec:conclusion}
 
-This comprehensive empirical study provides quantitative evidence for practical data structure selection in RGB image similarity search applications using real-world datasets. Our evaluation of five distinct approaches—Linear Search, Hash Search, Hash Dynamic Search, Octree Search, and Quadtree Search—across scales from 100 to 206,404 images reveals clear performance and precision trade-offs that inform algorithm selection decisions.
+This comprehensive empirical study provides quantitative evidence for practical data structure selection in RGB image similarity search applications using real-world datasets. Our evaluation of five distinct approaches—Linear Search, Hash Search, Hash Dynamic Search, Octree Search, and Quadtree Search—across scales from 10K to 206,395 images reveals clear performance and precision trade-offs that inform algorithm selection decisions.
 
 \subsection{Key Research Contributions}
 
