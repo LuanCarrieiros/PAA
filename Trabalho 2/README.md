@@ -154,26 +154,52 @@ sudo apt install libopencv-dev
 brew install opencv
 ```
 
+### **Dataset:**
+
+Este trabalho utiliza o dataset **Animals-10** do Kaggle:
+- **Fonte**: [Animals-10 Dataset](https://www.kaggle.com/datasets/alessiocorrado99/animals10)
+- **Tamanho**: 26.179 imagens reais (formato JPEG/PNG)
+- **Categorias**: 10 classes de animais (cão, gato, cavalo, etc.)
+- **Nota**: Algumas imagens (~5%) apresentam o warning `libpng: iCCP: known incorrect sRGB profile` devido a perfis de cor desatualizados, mas isso não afeta a extração RGB
+
+### **Preparação do Dataset:**
+
+1. **Baixar dataset**:
+   ```bash
+   # Opção 1: Via Kaggle CLI
+   kaggle datasets download -d alessiocorrado99/animals10
+
+   # Opção 2: Download manual do link acima
+   ```
+
+2. **Extrair e organizar**:
+   ```bash
+   # Criar pastas necessárias
+   mkdir -p images query resultados
+
+   # Extrair imagens para ./images/
+   # O código detecta automaticamente a quantidade de imagens
+   ```
+
+3. **Configurar query (opcional)**:
+   ```bash
+   # Copiar uma imagem para ser a query
+   cp images/ALGUMA_IMAGEM.jpg query/query.jpg
+
+   # Ou deixar vazio para usar RGB padrão (128, 128, 128)
+   ```
+
 ### **Compilação:**
 
 ```bash
 # Navegar para a pasta do Trabalho 2
 cd "Trabalho 2"
 
-# Compilar com OpenCV
-g++ -std=c++17 -O2 -o main src/main.cpp `pkg-config --cflags --libs opencv4`
+# Compilar com OpenCV (flag -Isrc necessária para headers locais)
+g++ -std=c++17 -O2 -o main src/main.cpp -Isrc $(pkg-config --cflags --libs opencv4)
 
 # Executar
 ./main
-```
-
-### **Preparação:**
-```bash
-# Criar pastas necessárias
-mkdir -p images query
-
-# Copiar suas imagens para ./images/
-# Copiar imagem de query para ./query/query.jpg (opcional)
 ```
 
 ### **Compilação com Warnings:**
@@ -186,24 +212,56 @@ g++ -std=c++17 -O2 -Wall -Wextra -o main src/main.cpp `pkg-config --cflags --lib
 ==================================================================================
  PAA TRABALHO 2 - Estruturas para Alta Dimensionalidade
  Comparação: Estruturas Básicas (T1) vs Estruturas Avançadas (T2)
+ DATASET: IMAGENS REAIS (não sintéticas!)
 ==================================================================================
 
 CONFIGURAÇÃO DO BENCHMARK:
-  Query: RGB(128, 128, 128)
+  Dataset: ./images/ (26179 imagens REAIS)
+  Query: RGB(66, 35, 226) de ./query/query.jpg
   Threshold: 40.0
-  Escalas: 1000, 5000, 10000, 25000, 50000
-  Dataset: Sintético com distribuição uniforme
+  Escalas: 1000, 5000, 10000, 25000, 26179
+  Fonte RGB: Extração REAL de arquivos via OpenCV
 
-[TESTANDO] Escala: 1000 imagens
-Gerando dataset...
-  Linear Search            : Insert=   0.50ms, Search=   0.02ms, Found=   15
-  Hash Search              : Insert=   1.20ms, Search=   0.01ms, Found=   15
+[TESTANDO] Escala: 1000 imagens REAIS
+Carregando dataset...
+libpng warning: iCCP: known incorrect sRGB profile  ← Normal, ~5% das imagens
+Processadas 1000 imagens reais...
+  Linear Search                                        : Insert=   0.02ms, Search=   0.49ms, Found= 303
+  Hash Search (Dynamic, cell=30.000000)                : Insert=   0.15ms, Search=   0.11ms, Found= 387
   ...
+
+✅ Resultados salvos em: resultados/resultados.txt
 ```
+
+**Warnings esperados**:
+- `libpng warning: iCCP: known incorrect sRGB profile` - Aparece em ~5% das imagens do dataset Animals-10. É apenas um aviso sobre perfis de cor desatualizados e **não afeta** a extração RGB.
 
 ---
 
-## 📊 Resultados Esperados
+## 📊 Resultados Obtidos (Dataset Real: 26.179 imagens)
+
+### **Vencedores por Categoria:**
+
+| Categoria | Vencedor | Tempo | Observação |
+|-----------|----------|-------|------------|
+| **Inserção** | Linear Search | 1.02 ms | O(1) puro sem overhead |
+| **Busca** | Quadtree Iterative | 2.25 ms | Subdivisão 2D eficiente |
+| **Busca (alternativa)** | Hash Dynamic Search | 2.47 ms | Expansão adaptativa |
+
+### **Performance das Estruturas de Alta Dimensionalidade:**
+
+| Estrutura | Insert (26K) | Search (26K) | Posição | Análise |
+|-----------|--------------|--------------|---------|---------|
+| **LSH** 🆕 | 58.19 ms | 5.40 ms | 🟥 7º/7º | Overhead alto em RGB 3D |
+| **M-Tree** 🆕 | 13.70 ms | 3.48 ms | 🟨 6º/5º | Bom em <5K, degrada com escala |
+
+### **Descoberta Principal:**
+
+> **Estruturas de alta dimensionalidade (LSH, M-Tree) NÃO são vantajosas para RGB 3D!**
+>
+> - LSH tem overhead 48x maior que Linear na inserção (58ms vs 1.2ms)
+> - RGB 3D é "baixa dimensão" - estruturas espaciais simples dominam
+> - **Curse of Dimensionality funciona "ao contrário"**: estruturas complexas sofrem em baixa dimensão
 
 ### **Trade-offs Observados:**
 
