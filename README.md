@@ -29,8 +29,27 @@ Estudo empírico comparativo de 5 estruturas de dados para busca de similaridade
 - ✅ Documentação LaTeX completa (4 páginas)
 - 📊 **Resultados**: Hash Search domina buscas (0.791ms), Linear Search domina inserções (20.487ms)
 
-### `Trabalho 2/` - *Em desenvolvimento*
-Será disponibilizado em breve...
+### [`Trabalho 2/`](./Trabalho%202/) - Estruturas de Dados para Alta Dimensionalidade
+
+Implementação e comparação de estruturas avançadas para busca de similaridade em alta dimensionalidade:
+
+**Estruturas Implementadas:**
+- **LSH (Locality-Sensitive Hashing)** 🆕 - Busca aproximada sublinear com projeções aleatórias
+- **M-Tree (Metric Tree)** 🆕 - Busca exata em espaços métricos com poda triangular
+
+**Comparação Completa:**
+- 🔄 Integra com as 5 estruturas do Trabalho 1
+- 📊 Compara 7 estruturas em um único framework
+- 🎯 Analisa trade-offs: Busca exata vs aproximada
+- ⚡ Avalia impacto da curse of dimensionality
+
+**Destaques do trabalho:**
+- ✅ LSH com múltiplas tabelas hash (L=10, k=4)
+- ✅ M-Tree com split balanceado e poda eficiente
+- ✅ Benchmarks sintéticos de 1K → 50K imagens
+- ✅ Análise teórica e prática de complexidade
+- ✅ Documentação completa com guias de compilação
+- 📊 **Objetivo**: Relatório JBCS comparativo (até 4 páginas)
 
 ### `Trabalho 3/` - *Planejado*
 Será disponibilizado em breve...
