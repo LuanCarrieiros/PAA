@@ -1,59 +1,59 @@
 
 
 ==================================================================================
-RESULTADOS FINAIS - COMPARAÇÃO COMPLETA (7 ESTRUTURAS) - IMAGENS REAIS
+RESULTADOS FINAIS - COMPARAÇÃO COMPLETA (7 ESTRUTURAS)
 ==================================================================================
 
-Dataset    Estrutura                   Insert(ms)   Search(ms)      Found
-------------------------------------------------------------------------------------
-1000       Linear Search                     0.02         0.49        303
-           Hash Search (Dynamic, cell=30.000000)         0.15         0.11        387
-           Hash Dynamic Search               0.16         0.06        303
-           Quadtree Iterative (maxPerNode=25)         0.24         0.05        303
-           Octree Search (maxPerNode=10)         0.16         0.06        303
-           LSH Search (L=10, k=4, w=50.000000)         2.28         0.21        288
-           M-Tree Search (capacity=10)         0.30         0.06        282
-------------------------------------------------------------------------------------
-5000       Linear Search                     0.23         0.43       1483
-           Hash Search (Dynamic, cell=30.000000)         0.93         0.47       1907
-           Hash Dynamic Search               0.77         0.38       1483
-           Quadtree Iterative (maxPerNode=25)         1.23         0.36       1483
-           Octree Search (maxPerNode=10)         1.01         0.41       1483
-           LSH Search (L=10, k=4, w=50.000000)        10.71         0.82       1423
-           M-Tree Search (capacity=10)         2.22         0.45       1265
-------------------------------------------------------------------------------------
-10000      Linear Search                     0.37         0.95       3109
-           Hash Search (Dynamic, cell=30.000000)         1.93         1.20       3987
-           Hash Dynamic Search               1.75         0.77       3109
-           Quadtree Iterative (maxPerNode=25)         2.40         0.80       3109
-           Octree Search (maxPerNode=10)         2.00         0.86       3109
-           LSH Search (L=10, k=4, w=50.000000)        22.53         1.58       2997
-           M-Tree Search (capacity=10)         4.20         0.75       2694
-------------------------------------------------------------------------------------
-25000      Linear Search                     1.35         2.37       7992
-           Hash Search (Dynamic, cell=30.000000)         5.89         4.16      10203
-           Hash Dynamic Search               4.84         2.27       7992
-           Quadtree Iterative (maxPerNode=25)         7.16         2.00       7992
-           Octree Search (maxPerNode=10)         7.20         2.56       7992
-           LSH Search (L=10, k=4, w=50.000000)        57.85         5.37       7668
-           M-Tree Search (capacity=10)        13.63         2.65       7272
-------------------------------------------------------------------------------------
-26179      Linear Search                     1.02         2.30       8380
-           Hash Search (Dynamic, cell=30.000000)         4.19         2.88      10697
-           Hash Dynamic Search               4.23         2.39       8380
-           Quadtree Iterative (maxPerNode=25)         9.12         2.25       8380
-           Octree Search (maxPerNode=10)         6.13         2.25       8380
-           LSH Search (L=10, k=4, w=50.000000)        61.14         5.11       8039
-           M-Tree Search (capacity=10)        12.58         2.92       7650
-------------------------------------------------------------------------------------
+Dataset    Estrutura                                       Insert(ms)   Search(ms)      Found
+--------------------------------------------------------------------------------------------
+1000       Linear Search                                         0.01         0.36        303
+           Hash Search (Dynamic, cell=30.000000)                 0.14         0.08        387
+           Hash Dynamic Search                                   0.14         0.06        303
+           Quadtree Iterative (maxPerNode=25)                    0.25         0.06        303
+           Octree Search (maxPerNode=10)                         0.15         0.06        303
+           LSH Search (L=10, k=4, w=50.000000)                   2.34         0.18        288
+           M-Tree Search (capacity=10)                           0.30         0.06        282
+--------------------------------------------------------------------------------------------
+5000       Linear Search                                         0.15         0.36       1483
+           Hash Search (Dynamic, cell=30.000000)                 0.73         0.49       1907
+           Hash Dynamic Search                                   0.83         0.34       1483
+           Quadtree Iterative (maxPerNode=25)                    0.99         0.35       1483
+           Octree Search (maxPerNode=10)                         0.87         0.38       1483
+           LSH Search (L=10, k=4, w=50.000000)                  10.23         0.77       1423
+           M-Tree Search (capacity=10)                           1.62         0.35       1265
+--------------------------------------------------------------------------------------------
+10000      Linear Search                                         0.29         0.77       3109
+           Hash Search (Dynamic, cell=30.000000)                 1.50         0.93       3987
+           Hash Dynamic Search                                   1.58         0.77       3109
+           Quadtree Iterative (maxPerNode=25)                    2.16         0.76       3109
+           Octree Search (maxPerNode=10)                         1.89         1.07       3109
+           LSH Search (L=10, k=4, w=50.000000)                  20.29         1.55       2997
+           M-Tree Search (capacity=10)                           4.26         0.79       2694
+--------------------------------------------------------------------------------------------
+25000      Linear Search                                         0.78         2.19       7992
+           Hash Search (Dynamic, cell=30.000000)                 3.65         2.62      10203
+           Hash Dynamic Search                                   4.07         2.02       7992
+           Quadtree Iterative (maxPerNode=25)                    6.00         2.00       7992
+           Octree Search (maxPerNode=10)                         5.35         2.23       7992
+           LSH Search (L=10, k=4, w=50.000000)                  52.20         4.70       7668
+           M-Tree Search (capacity=10)                          11.22         2.22       7272
+--------------------------------------------------------------------------------------------
+26179      Linear Search                                         1.00         2.32       8380
+           Hash Search (Dynamic, cell=30.000000)                 3.68         2.83      10697
+           Hash Dynamic Search                                   4.14         2.15       8380
+           Quadtree Iterative (maxPerNode=25)                    6.92         2.25       8380
+           Octree Search (maxPerNode=10)                         5.48         2.12       8380
+           LSH Search (L=10, k=4, w=50.000000)                  53.91         4.62       8039
+           M-Tree Search (capacity=10)                          11.85         2.46       7650
+--------------------------------------------------------------------------------------------
 
 ANÁLISE DE VENCEDORES POR ESCALA:
 ==================================================================================
-1000       | Insert: Linear Search             (   0.02ms) | Search: Quadtree Iterative (maxPerNode=25) (   0.05ms)
-5000       | Insert: Linear Search             (   0.23ms) | Search: Quadtree Iterative (maxPerNode=25) (   0.36ms)
-10000      | Insert: Linear Search             (   0.37ms) | Search: M-Tree Search (capacity=10) (   0.75ms)
-25000      | Insert: Linear Search             (   1.35ms) | Search: Quadtree Iterative (maxPerNode=25) (   2.00ms)
-26179      | Insert: Linear Search             (   1.02ms) | Search: Quadtree Iterative (maxPerNode=25) (   2.25ms)
+1000       | Insert: Linear Search             (   0.01ms) | Search: Quadtree Iterative (maxPerNode=25) (   0.06ms)
+5000       | Insert: Linear Search             (   0.15ms) | Search: Hash Dynamic Search       (   0.34ms)
+10000      | Insert: Linear Search             (   0.29ms) | Search: Quadtree Iterative (maxPerNode=25) (   0.76ms)
+25000      | Insert: Linear Search             (   0.78ms) | Search: Quadtree Iterative (maxPerNode=25) (   2.00ms)
+26179      | Insert: Linear Search             (   1.00ms) | Search: Octree Search (maxPerNode=10) (   2.12ms)
 
 ==================================================================================
 COMPARAÇÃO: TRABALHO 1 (Estruturas Básicas) vs TRABALHO 2 (Alta Dimensão)
