@@ -29,34 +29,45 @@ Estudo empírico comparativo de 5 estruturas de dados para busca de similaridade
 - ✅ Documentação LaTeX completa (4 páginas)
 - 📊 **Resultados**: Hash Search domina buscas (0.791ms), Linear Search domina inserções (20.487ms)
 
-### [`Trabalho 2/`](./Trabalho%202/) - Estruturas de Dados para Alta Dimensionalidade (**TRABALHO FINAL**)
+### [`Trabalho 2/`](./Trabalho%202/) - Estruturas para Alta Dimensionalidade (**TRABALHO FINAL**)
 
-Implementação e análise comparativa de estruturas avançadas para busca de similaridade em alta dimensionalidade, com foco em avaliar a eficácia de estruturas modernas versus clássicas em espaços RGB 3D.
+Análise comparativa de estruturas de busca por similaridade em **dois contextos dimensionais**:
 
-**Estruturas Novas Implementadas:**
-- **LSH (Locality-Sensitive Hashing)** 🆕 - Busca aproximada sublinear com random projections
-- **M-Tree (Metric Tree)** 🆕 - Busca exata em espaços métricos com poda triangular
+**Experimento Principal - ColorHistogram 32D:**
+- 📊 Dataset: **68.040 vetores** de histogramas de cores (32 dimensões) - [UCI Corel Image Features](https://archive.ics.uci.edu/dataset/119/corel+image+features)
+- 🎯 Estruturas testadas: LinearSearch, LSH, M-Tree
+- ✅ **LSH vence**: 2.9× mais rápido em buscas (50K escala)
+- ✅ Valida design de LSH para alta dimensionalidade real
 
-**Comparação Completa:**
-- 🔄 Integra as 5 estruturas do Trabalho 1 + 2 novas (total: **7 estruturas**)
-- 📊 Dataset real: **26.179 imagens** do [Animals-10 Kaggle](https://www.kaggle.com/datasets/alessiocorrado99/animals10)
-- 🎯 Análise de trade-offs: Busca exata vs aproximada
-- ⚡ Descoberta: **Curse of Dimensionality funciona "ao contrário"** em RGB 3D
+**Experimento Validação - RGB 3D:**
+- 📊 Dataset: **26.179 imagens** Animals-10 (Kaggle)
+- 🎯 Total: **7 estruturas** (Trabalho 1 + LSH + M-Tree)
+- ✅ **Octree/Quadtree vencem**: Estruturas clássicas dominam em 3D
+- ✅ Demonstra overhead de LSH em baixa dimensão
 
-**Resultados Principais (26K imagens):**
-- 🥇 **Melhor Inserção**: Linear Search (1.02ms)
-- 🥇 **Melhor Busca**: Hash Dynamic Search (2.47ms) e Quadtree (2.25ms)
-- 📉 **LSH**: Overhead alto em 3D (58.19ms insert) - não vale a pena para RGB
-- ⚖️ **M-Tree**: Competitivo em pequena escala (<5K), degrada com dataset grande
+**Descoberta - Bidirectional Curse of Dimensionality:**
+- ⚡ LSH **excelente em 32D**, **ruim em 3D**
+- ⚡ Estruturas espaciais (Octree/Quadtree) **ótimas em 3D**, **não funcionam em 32D**
+- 📊 Conclusão: **Matching dimensão-algoritmo é crítico**
 
-**Destaques do trabalho:**
-- ✅ Implementação completa de LSH com múltiplas tabelas (L=10, k=4, w=50)
-- ✅ M-Tree com split balanceado e poda por desigualdade triangular
-- ✅ Extração RGB real via OpenCV de 26K+ imagens
-- ✅ Benchmarks em escalas: 1K, 5K, 10K, 25K, 26K imagens
-- ✅ Query real extraída de imagem (RGB: 66, 35, 226)
-- ✅ Documentação LaTeX completa (formato JBCS, até 4 páginas)
-- 📊 **Conclusão**: Estruturas básicas (Hash, Quadtree) dominam em RGB 3D; LSH/M-Tree são over-engineering
+**Resultados ColorHistogram 32D (50K vetores):**
+- 🥇 **Busca**: LSH (1.67ms) vs LinearSearch (4.83ms) - **2.9× speedup**
+- 📈 **Inserção**: LinearSearch (15.2ms) vs LSH (88.7ms)
+- ✅ **Precisão**: LSH ~95% vs Linear 100%
+
+**Resultados RGB 3D (26K imagens):**
+- 🥇 **Busca**: Octree (2.12ms) vs LSH (4.62ms) - estruturas clássicas dominam
+- 🥇 **Inserção**: Linear (1.00ms) - sem overhead
+- ❌ **LSH em 3D**: 53× mais lento na inserção - não recomendado
+
+**Destaques Técnicos:**
+- ✅ Dois modos no mesmo programa: `./trabalho2` (RGB) e `./trabalho2 hist` (32D)
+- ✅ LSH com 10 tabelas hash (L=10, k=8 para 32D / k=4 para 3D)
+- ✅ M-Tree com poda por desigualdade triangular
+- ✅ Query interativa (RGB) e fixa (ColorHistogram)
+- ✅ Resultados com timestamp único
+- ✅ Makefile profissional: `make run` / `make run-hist`
+- 📄 Documentação LaTeX (formato JBCS)
 
 ---
 
