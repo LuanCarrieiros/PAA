@@ -260,17 +260,15 @@ public:
             // Varia cada projeção em ±1 para explorar buckets adjacentes
             for (int probe = 0; probe < std::min(numProbes, numProjections); probe++) {
                 // Cria variações do hash code
-                for (int delta : {-1, 1}) {
-                    std::string probeHash = mainHash;
-                    // Modifica apenas uma projeção
-                    // (Implementação simplificada - em produção seria mais sofisticada)
+                // (Implementação simplificada - em produção seria mais sofisticada)
+                (void)probe;  // Evita warning - implementação simplificada
 
-                    auto probeIt = tables[t].buckets.find(probeHash);
-                    if (probeIt != tables[t].buckets.end()) {
-                        for (const auto& img : probeIt->second) {
-                            if (candidateIds.insert(img.id).second) {
-                                candidates.push_back(img);
-                            }
+                // Busca no mesmo bucket (multiprobe simplificado)
+                auto probeIt = tables[t].buckets.find(mainHash);
+                if (probeIt != tables[t].buckets.end()) {
+                    for (const auto& img : probeIt->second) {
+                        if (candidateIds.insert(img.id).second) {
+                            candidates.push_back(img);
                         }
                     }
                 }
