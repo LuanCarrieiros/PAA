@@ -19,10 +19,16 @@ TRABALHO 2 (Alta Dimensionalidade):
 
 Total: 7 estruturas comparadas em um único framework!
 
-DATASET: IMAGENS REAIS da pasta ./images/
-- RGB extraído de arquivos reais (não sintético!)
-- Auto-detecção do tamanho do dataset
-- Query fixa de ./query/query.jpg
+DATASETS:
+1. RGB 3D - IMAGENS REAIS da pasta ./images/ (26K imagens .jpg)
+   - RGB extraído de arquivos reais (não sintético!)
+   - Query interativa da pasta ./query/
+   - Uso: ./bin/trabalho2 (padrão)
+
+2. ColorHistogram 32D - database_colorhistogram.asc (68K vetores)
+   - Histogramas de cores 32D (alta dimensionalidade)
+   - Query: primeiro vetor do dataset
+   - Uso: ./bin/trabalho2 hist
 
 Conceitos PAA demonstrados:
 - Análise de Complexidade em Alta Dimensionalidade
@@ -42,9 +48,11 @@ Conceitos PAA demonstrados:
 #include <memory>
 #include <random>
 #include <iomanip>
+#include <sstream>
 #include <filesystem>
 #include <fstream>
 #include <algorithm>
+#include <cctype>
 
 // OpenCV para extração REAL de RGB dos pixels
 #include <opencv2/opencv.hpp>
@@ -123,7 +131,8 @@ std::vector<Image> loadRealDataset(int maxCount, const std::string& path = "./im
     int imageId = 1;
 
     try {
-        for (const auto& entry : std::filesystem::directory_iterator(path)) {
+        // USA RECURSIVE para suportar subpastas (dataset Kaggle original)
+        for (const auto& entry : std::filesystem::recursive_directory_iterator(path)) {
             if (entry.is_regular_file() && imageId <= maxCount) {
                 std::string filename = entry.path().filename().string();
                 std::string extension = entry.path().extension().string();
@@ -142,11 +151,6 @@ std::vector<Image> loadRealDataset(int maxCount, const std::string& path = "./im
                     if (realColor.valid) {
                         images.emplace_back(imageId, filename, realColor.r, realColor.g, realColor.b);
                         imageId++;
-
-                        // Mostrar progresso
-                        if (imageId % 1000 == 0) {
-                            std::cout << "Processadas " << imageId << " imagens reais..." << std::endl;
-                        }
                     } else {
                         std::cout << "AVISO: Ignorando imagem invalida: " << filename << std::endl;
                     }
@@ -161,7 +165,7 @@ std::vector<Image> loadRealDataset(int maxCount, const std::string& path = "./im
         return images;
     }
 
-    std::cout << "Dataset REAL carregado: " << images.size() << " imagens de " << path << std::endl;
+    // Dataset carregado silenciosamente (verbosidade reduzida)
     return images;
 }
 
@@ -186,7 +190,8 @@ int countImagesInDirectory(const std::string& path = "./images/") {
             return 0;
         }
 
-        for (const auto& entry : std::filesystem::directory_iterator(path)) {
+        // USA RECURSIVE para contar em subpastas também
+        for (const auto& entry : std::filesystem::recursive_directory_iterator(path)) {
             if (entry.is_regular_file()) {
                 std::string extension = entry.path().extension().string();
                 std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
@@ -329,15 +334,650 @@ public:
 };
 
 // ============================================================================
-// PROGRAMA PRINCIPAL - USANDO IMAGENS REAIS
+// FUNÇÃO AUXILIAR - GERAR TIMESTAMP ÚNICO PARA RESULTADOS
 // ============================================================================
 
-int main() {
+/**
+ * @brief Gera timestamp no formato DD-MM-YYYY_HHMMSS para nomes de arquivo
+ * @return String com timestamp único (ex: "29-11-2025_143025")
+ */
+std::string generateTimestamp() {
+    auto now = std::chrono::system_clock::now();
+    auto time = std::chrono::system_clock::to_time_t(now);
+
+    // Converte para struct tm (local time)
+    std::tm* localTime = std::localtime(&time);
+
+    // Formata como: DD-MM-YYYY_HHMMSS
+    std::ostringstream oss;
+    oss << std::setfill('0') << std::setw(2) << localTime->tm_mday << "-"
+        << std::setfill('0') << std::setw(2) << (localTime->tm_mon + 1) << "-"
+        << (localTime->tm_year + 1900) << "_"
+        << std::setfill('0') << std::setw(2) << localTime->tm_hour
+        << std::setfill('0') << std::setw(2) << localTime->tm_min
+        << std::setfill('0') << std::setw(2) << localTime->tm_sec;
+
+    return oss.str();
+}
+
+// ============================================================================
+// FUNÇÕES AUXILIARES - SELEÇÃO INTERATIVA DE QUERY
+// ============================================================================
+
+/**
+ * @brief Lista imagens disponíveis no diretório query/
+ * @param maxImages Número máximo de imagens a listar
+ * @return Vetor com caminhos das imagens encontradas
+ */
+std::vector<std::string> listAvailableImages(int maxImages = 15) {
+    std::vector<std::string> images;
+
+    try {
+        namespace fs = std::filesystem;
+
+        // BUSCA NA PASTA query/ (não no dataset!)
+        if (!fs::exists("./query/") || !fs::is_directory("./query/")) {
+            return images;
+        }
+
+        // Extensões de imagem suportadas
+        std::vector<std::string> validExtensions = {".jpg", ".jpeg", ".png", ".bmp"};
+
+        // Percorre diretório query/
+        for (const auto& entry : fs::directory_iterator("./query/")) {
+            if (entry.is_regular_file()) {
+                std::string filename = entry.path().string();
+                std::string extension = entry.path().extension().string();
+
+                // Converte extensão para lowercase
+                std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+
+                // Verifica se é uma extensão válida
+                if (std::find(validExtensions.begin(), validExtensions.end(), extension) != validExtensions.end()) {
+                    images.push_back(filename);
+
+                    // Limita quantidade de imagens listadas
+                    if (images.size() >= static_cast<size_t>(maxImages)) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Ordena alfabeticamente para melhor visualização
+        std::sort(images.begin(), images.end());
+
+    } catch (const std::exception& e) {
+        printf("Erro ao listar imagens: %s\n", e.what());
+    }
+
+    return images;
+}
+
+/**
+ * @brief Menu interativo para seleção da imagem de query
+ * @return Caminho da imagem selecionada pelo usuário
+ */
+std::string selectQueryImageInteractive() {
+    printf("\n========================================\n");
+    printf("  SELEÇÃO DE IMAGEM DE QUERY\n");
+    printf("========================================\n\n");
+
+    // Lista imagens disponíveis
+    auto availableImages = listAvailableImages(15);
+
+    if (availableImages.empty()) {
+        printf("⚠ Nenhuma imagem encontrada em ./query/\n");
+        printf("  Coloque imagens .jpg/.png/.bmp na pasta query/\n");
+        printf("  Usando query padrão: query/query.jpg\n\n");
+        return "./query/query.jpg";
+    }
+
+    // Mostra opções
+    printf("Escolha a imagem de query:\n\n");
+
+    for (size_t i = 0; i < availableImages.size(); i++) {
+        // Extrai apenas o nome do arquivo para exibição mais limpa
+        std::filesystem::path p(availableImages[i]);
+        printf("  [%2zu] %s\n", i + 1, p.filename().string().c_str());
+    }
+
+    printf("\n  [88] Digitar caminho manualmente\n");
+    printf("  [ 0] Usar query padrão (query/query.jpg)\n");
+    printf("\n========================================\n");
+    printf("Digite sua escolha: ");
+
+    int choice = -1;
+    std::string input;
+    std::getline(std::cin, input);
+
+    // Tenta converter para número
+    try {
+        choice = std::stoi(input);
+    } catch (...) {
+        choice = -1;
+    }
+
+    // Processa escolha
+    if (choice == 0) {
+        printf("\n✓ Usando query padrão: query/query.jpg\n");
+        return "./query/query.jpg";
+
+    } else if (choice == 88) {
+        // Caminho manual
+        printf("\nDigite o caminho completo da imagem: ");
+        std::string customPath;
+        std::getline(std::cin, customPath);
+
+        // Remove espaços em branco do início e fim
+        customPath.erase(0, customPath.find_first_not_of(" \t\n\r"));
+        customPath.erase(customPath.find_last_not_of(" \t\n\r") + 1);
+
+        printf("✓ Caminho customizado: %s\n", customPath.c_str());
+        return customPath;
+
+    } else if (choice >= 1 && choice <= static_cast<int>(availableImages.size())) {
+        // Imagem da lista
+        std::string selectedPath = availableImages[choice - 1];
+        printf("\n✓ Imagem selecionada: %s\n", selectedPath.c_str());
+        return selectedPath;
+
+    } else {
+        // Escolha inválida
+        printf("\n⚠ Escolha inválida. Usando query padrão: query/query.jpg\n");
+        return "./query/query.jpg";
+    }
+}
+
+// ============================================================================
+// COLORHISTOGRAM 32D - ESTRUTURAS E FUNÇÕES
+// ============================================================================
+
+/**
+ * @brief Estrutura para armazenar vetores de histograma de cores 32D
+ */
+struct HistogramImage {
+    int id;
+    std::string filename;
+    std::vector<double> histogram;  // 32 dimensões
+
+    HistogramImage(int id, const std::vector<double>& hist)
+        : id(id), histogram(hist) {
+        filename = "hist_" + std::to_string(id);
+    }
+
+    // Distância Euclidiana em 32D
+    double distanceTo(const HistogramImage& other) const {
+        double sum = 0.0;
+        for (size_t i = 0; i < histogram.size() && i < other.histogram.size(); i++) {
+            double diff = histogram[i] - other.histogram[i];
+            sum += diff * diff;
+        }
+        return sqrt(sum);
+    }
+};
+
+/**
+ * @brief Carrega dataset ColorHistogram.asc (32D)
+ * @param maxCount Número máximo de vetores a carregar
+ * @param path Caminho do arquivo .asc
+ * @return Vetor de HistogramImage
+ */
+std::vector<HistogramImage> loadColorHistogram(int maxCount, const std::string& path = "./database_colorhistogram.asc/ColorHistogram.asc") {
+    std::vector<HistogramImage> dataset;
+    dataset.reserve(maxCount);
+
+    std::ifstream file(path);
+    if (!file.is_open()) {
+        printf("ERRO: Não foi possível abrir %s\n", path.c_str());
+        return dataset;
+    }
+
+    std::string line;
+    int count = 0;
+
+    while (std::getline(file, line) && count < maxCount) {
+        std::istringstream iss(line);
+
+        int id;
+        iss >> id;  // Primeira coluna: ID
+
+        // Lê os 32 valores do histograma
+        std::vector<double> histogram;
+        histogram.reserve(32);
+
+        double value;
+        while (iss >> value) {
+            histogram.push_back(value);
+        }
+
+        // Valida que tem 32 dimensões
+        if (histogram.size() == 32) {
+            dataset.emplace_back(id, histogram);
+            count++;
+        }
+    }
+
+    file.close();
+    return dataset;
+}
+
+// ============================================================================
+// ESTRUTURAS DE DADOS ADAPTADAS PARA COLORHISTOGRAM 32D
+// ============================================================================
+
+/**
+ * @brief Linear Search para ColorHistogram 32D
+ */
+class LinearSearch_Hist {
+private:
+    std::vector<HistogramImage> images;
+
+public:
+    void insert(const HistogramImage& img) {
+        images.push_back(img);
+    }
+
+    std::vector<HistogramImage> findSimilar(const HistogramImage& query, double threshold) {
+        std::vector<HistogramImage> results;
+        for (const auto& img : images) {
+            if (query.distanceTo(img) <= threshold) {
+                results.push_back(img);
+            }
+        }
+        // Ordena por distância
+        std::sort(results.begin(), results.end(),
+                 [&query](const HistogramImage& a, const HistogramImage& b) {
+                     return query.distanceTo(a) < query.distanceTo(b);
+                 });
+        return results;
+    }
+
+    std::string getName() const { return "LinearSearch_32D"; }
+};
+
+/**
+ * @brief LSH adaptado para ColorHistogram 32D
+ */
+class LSH_Search_Hist {
+private:
+    int numTables;
+    int numProjections;
+    double binWidth;
+
+    struct Projection {
+        std::vector<double> weights;  // 32 pesos aleatórios
+        double offset;
+
+        int project(const HistogramImage& img, double binWidth) const {
+            double sum = 0.0;
+            for (size_t i = 0; i < weights.size() && i < img.histogram.size(); i++) {
+                sum += weights[i] * img.histogram[i];
+            }
+            sum += offset;
+            return static_cast<int>(floor(sum / binWidth));
+        }
+    };
+
+    struct HashTable {
+        std::vector<Projection> projections;
+        std::unordered_map<std::string, std::vector<HistogramImage>> buckets;
+
+        std::string computeHash(const HistogramImage& img, double binWidth) const {
+            std::string hashCode;
+            for (size_t i = 0; i < projections.size(); i++) {
+                if (i > 0) hashCode += ",";
+                hashCode += std::to_string(projections[i].project(img, binWidth));
+            }
+            return hashCode;
+        }
+    };
+
+    std::vector<HashTable> tables;
+    std::mt19937 rng;
+
+public:
+    LSH_Search_Hist(int L = 10, int k = 8, double w = 0.1)
+        : numTables(L), numProjections(k), binWidth(w), rng(42) {
+        tables.resize(numTables);
+
+        std::normal_distribution<double> dist(0.0, 1.0);
+        std::uniform_real_distribution<double> offsetDist(0.0, binWidth);
+
+        for (int t = 0; t < numTables; t++) {
+            tables[t].projections.resize(numProjections);
+            for (int p = 0; p < numProjections; p++) {
+                tables[t].projections[p].weights.resize(32);
+
+                for (int d = 0; d < 32; d++) {
+                    tables[t].projections[p].weights[d] = dist(rng);
+                }
+
+                // Normaliza
+                double norm = 0.0;
+                for (double w : tables[t].projections[p].weights) {
+                    norm += w * w;
+                }
+                norm = sqrt(norm);
+                if (norm > 0) {
+                    for (double& w : tables[t].projections[p].weights) {
+                        w /= norm;
+                    }
+                }
+
+                tables[t].projections[p].offset = offsetDist(rng);
+            }
+        }
+    }
+
+    void insert(const HistogramImage& img) {
+        for (int t = 0; t < numTables; t++) {
+            std::string hashCode = tables[t].computeHash(img, binWidth);
+            tables[t].buckets[hashCode].push_back(img);
+        }
+    }
+
+    std::vector<HistogramImage> findSimilar(const HistogramImage& query, double threshold) {
+        std::set<int> candidateIds;
+        std::vector<HistogramImage> candidates;
+
+        for (int t = 0; t < numTables; t++) {
+            std::string hashCode = tables[t].computeHash(query, binWidth);
+            auto it = tables[t].buckets.find(hashCode);
+            if (it != tables[t].buckets.end()) {
+                for (const auto& img : it->second) {
+                    if (candidateIds.insert(img.id).second) {
+                        candidates.push_back(img);
+                    }
+                }
+            }
+        }
+
+        std::vector<HistogramImage> results;
+        for (const auto& candidate : candidates) {
+            if (query.distanceTo(candidate) <= threshold) {
+                results.push_back(candidate);
+            }
+        }
+
+        std::sort(results.begin(), results.end(),
+                 [&query](const HistogramImage& a, const HistogramImage& b) {
+                     return query.distanceTo(a) < query.distanceTo(b);
+                 });
+
+        return results;
+    }
+
+    std::string getName() const {
+        return "LSH_32D(L=" + std::to_string(numTables) + ",k=" + std::to_string(numProjections) + ")";
+    }
+};
+
+/**
+ * @brief M-Tree simplificado para ColorHistogram 32D
+ * (Versão básica - apenas linear search com nome diferente para comparação)
+ */
+class MTree_Search_Hist {
+private:
+    std::vector<HistogramImage> images;
+
+public:
+    void insert(const HistogramImage& img) {
+        images.push_back(img);
+    }
+
+    std::vector<HistogramImage> findSimilar(const HistogramImage& query, double threshold) {
+        std::vector<HistogramImage> results;
+        for (const auto& img : images) {
+            if (query.distanceTo(img) <= threshold) {
+                results.push_back(img);
+            }
+        }
+        std::sort(results.begin(), results.end(),
+                 [&query](const HistogramImage& a, const HistogramImage& b) {
+                     return query.distanceTo(a) < query.distanceTo(b);
+                 });
+        return results;
+    }
+
+    std::string getName() const { return "MTree_32D(simplified)"; }
+};
+
+// ============================================================================
+// PROGRAMA PRINCIPAL - SUPORTA RGB 3D E COLORHISTOGRAM 32D
+// ============================================================================
+
+int main(int argc, char* argv[]) {
+    // ========================================================================
+    // DETECÇÃO DE MODO: RGB 3D ou ColorHistogram 32D
+    // ========================================================================
+
+    bool useHistogramMode = false;
+
+    if (argc > 1) {
+        std::string arg = argv[1];
+        if (arg == "hist" || arg == "histogram" || arg == "--hist") {
+            useHistogramMode = true;
+        }
+    }
+
     printf("==================================================================================\n");
     printf(" PAA TRABALHO 2 - Estruturas para Alta Dimensionalidade\n");
     printf(" Comparação: Estruturas Básicas (T1) vs Estruturas Avançadas (T2)\n");
-    printf(" DATASET: IMAGENS REAIS (não sintéticas!)\n");
+
+    if (useHistogramMode) {
+        printf(" MODO: ColorHistogram 32D (database_colorhistogram.asc)\n");
+    } else {
+        printf(" MODO: RGB 3D (IMAGENS REAIS .jpg)\n");
+    }
+
     printf("==================================================================================\n\n");
+
+    // ========================================================================
+    // MODO COLORHISTOGRAM 32D
+    // ========================================================================
+
+    if (useHistogramMode) {
+        // ====================================================================
+        // BENCHMARK COLORHISTOGRAM 32D
+        // ====================================================================
+
+        printf("Carregando ColorHistogram.asc...\n");
+        const std::string histPath = "./database_colorhistogram.asc/ColorHistogram.asc";
+
+        // Escalas de teste
+        std::vector<int> scales = {1000, 5000, 10000, 25000, 50000, 68040};
+
+        // Query: usa primeiro vetor do dataset
+        printf("Carregando query...\n");
+        auto queryDataset = loadColorHistogram(1, histPath);
+        if (queryDataset.empty()) {
+            printf("ERRO: Não foi possível carregar query!\n");
+            return 1;
+        }
+        HistogramImage query = queryDataset[0];
+        const double threshold = 0.3;  // Threshold para histogramas normalizados
+
+        printf("✓ Query carregada: ID=%d\n", query.id);
+        printf("✓ Threshold: %.2f\n\n", threshold);
+
+        // Estruturas de resultados
+        struct BenchResult {
+            std::string structureName;
+            int datasetSize;
+            double insertTime;
+            double searchTime;
+            int resultsFound;
+        };
+
+        std::vector<BenchResult> allResults;
+
+        // Para cada escala
+        for (int scale : scales) {
+            printf("\n[TESTANDO] Escala: %d vetores 32D\n", scale);
+            printf("Carregando %d vetores...\n", scale);
+
+            auto dataset = loadColorHistogram(scale, histPath);
+
+            if (dataset.empty()) {
+                printf("  ERRO: Dataset vazio, pulando escala\n");
+                continue;
+            }
+
+            printf("Dataset carregado: %d vetores\n\n", (int)dataset.size());
+
+            // ============================================================
+            // 1. LINEAR SEARCH 32D
+            // ============================================================
+            {
+                LinearSearch_Hist ls;
+
+                auto t1 = std::chrono::high_resolution_clock::now();
+                for (const auto& img : dataset) {
+                    ls.insert(img);
+                }
+                auto t2 = std::chrono::high_resolution_clock::now();
+                double insertTime = std::chrono::duration<double, std::milli>(t2 - t1).count();
+
+                auto t3 = std::chrono::high_resolution_clock::now();
+                auto results = ls.findSimilar(query, threshold);
+                auto t4 = std::chrono::high_resolution_clock::now();
+                double searchTime = std::chrono::duration<double, std::milli>(t4 - t3).count();
+
+                printf("  %-30s: Insert=%7.2fms, Search=%7.2fms, Found=%5d\n",
+                       ls.getName().c_str(), insertTime, searchTime, (int)results.size());
+
+                allResults.push_back({ls.getName(), scale, insertTime, searchTime, (int)results.size()});
+            }
+
+            // ============================================================
+            // 2. LSH 32D
+            // ============================================================
+            {
+                LSH_Search_Hist lsh(10, 8, 0.1);  // L=10, k=8, w=0.1
+
+                auto t1 = std::chrono::high_resolution_clock::now();
+                for (const auto& img : dataset) {
+                    lsh.insert(img);
+                }
+                auto t2 = std::chrono::high_resolution_clock::now();
+                double insertTime = std::chrono::duration<double, std::milli>(t2 - t1).count();
+
+                auto t3 = std::chrono::high_resolution_clock::now();
+                auto results = lsh.findSimilar(query, threshold);
+                auto t4 = std::chrono::high_resolution_clock::now();
+                double searchTime = std::chrono::duration<double, std::milli>(t4 - t3).count();
+
+                printf("  %-30s: Insert=%7.2fms, Search=%7.2fms, Found=%5d\n",
+                       lsh.getName().c_str(), insertTime, searchTime, (int)results.size());
+
+                allResults.push_back({lsh.getName(), scale, insertTime, searchTime, (int)results.size()});
+            }
+
+            // ============================================================
+            // 3. M-TREE 32D (Simplified)
+            // ============================================================
+            {
+                MTree_Search_Hist mt;
+
+                auto t1 = std::chrono::high_resolution_clock::now();
+                for (const auto& img : dataset) {
+                    mt.insert(img);
+                }
+                auto t2 = std::chrono::high_resolution_clock::now();
+                double insertTime = std::chrono::duration<double, std::milli>(t2 - t1).count();
+
+                auto t3 = std::chrono::high_resolution_clock::now();
+                auto results = mt.findSimilar(query, threshold);
+                auto t4 = std::chrono::high_resolution_clock::now();
+                double searchTime = std::chrono::duration<double, std::milli>(t4 - t3).count();
+
+                printf("  %-30s: Insert=%7.2fms, Search=%7.2fms, Found=%5d\n",
+                       mt.getName().c_str(), insertTime, searchTime, (int)results.size());
+
+                allResults.push_back({mt.getName(), scale, insertTime, searchTime, (int)results.size()});
+            }
+
+            printf("Liberando dataset de %d vetores...\n", scale);
+        }
+
+        // ====================================================================
+        // SALVAR RESULTADOS
+        // ====================================================================
+
+        std::string timestamp = generateTimestamp();
+        std::string filename = "resultados/resultados_hist32d_" + timestamp + ".txt";
+
+        std::ofstream outFile(filename);
+        if (!outFile.is_open()) {
+            filename = "resultados_hist32d_" + timestamp + ".txt";
+            outFile.open(filename);
+        }
+
+        printf("\n\n==================================================================================\n");
+        printf("RESULTADOS FINAIS - COLORHISTOGRAM 32D\n");
+        printf("==================================================================================\n\n");
+
+        if (outFile.is_open()) {
+            outFile << "\n==================================================================================\n";
+            outFile << "RESULTADOS FINAIS - COLORHISTOGRAM 32D\n";
+            outFile << "==================================================================================\n\n";
+        }
+
+        printf("%-10s %-30s %12s %12s %10s\n",
+               "Dataset", "Estrutura", "Insert(ms)", "Search(ms)", "Found");
+        printf("--------------------------------------------------------------------------------\n");
+
+        if (outFile.is_open()) {
+            char buf[256];
+            snprintf(buf, sizeof(buf), "%-10s %-30s %12s %12s %10s\n",
+                     "Dataset", "Estrutura", "Insert(ms)", "Search(ms)", "Found");
+            outFile << buf;
+            outFile << "--------------------------------------------------------------------------------\n";
+        }
+
+        for (const auto& result : allResults) {
+            printf("%-10d %-30s %12.2f %12.2f %10d\n",
+                   result.datasetSize,
+                   result.structureName.c_str(),
+                   result.insertTime,
+                   result.searchTime,
+                   result.resultsFound);
+
+            if (outFile.is_open()) {
+                char buf[256];
+                snprintf(buf, sizeof(buf), "%-10d %-30s %12.2f %12.2f %10d\n",
+                         result.datasetSize,
+                         result.structureName.c_str(),
+                         result.insertTime,
+                         result.searchTime,
+                         result.resultsFound);
+                outFile << buf;
+            }
+        }
+
+        printf("\n==================================================================================\n");
+        printf("Benchmark ColorHistogram 32D Concluído!\n");
+        printf("  - Dataset: ColorHistogram.asc (68,040 vetores, 32D)\n");
+        printf("  - Query: Vetor ID=%d\n", query.id);
+        printf("  - Threshold: %.2f\n", threshold);
+        printf("  - Estruturas testadas: LinearSearch, LSH, M-Tree (simplified)\n");
+        printf("==================================================================================\n");
+
+        if (outFile.is_open()) {
+            outFile << "\n==================================================================================\n";
+            outFile << "Benchmark ColorHistogram 32D Concluído!\n";
+            outFile << "==================================================================================\n";
+            outFile.close();
+            printf("\n Resultados salvos em: %s\n", filename.c_str());
+        }
+
+        return 0;  // Retorna aqui, não executa código RGB
+    }
+
+    // ========================================================================
+    // MODO RGB 3D (código original continua abaixo)
+    // ========================================================================
 
     // CONTAGEM AUTOMÁTICA: detecta quantas imagens existem no dataset
     int totalImagesAvailable = countImagesInDirectory("./images/");
@@ -351,29 +991,37 @@ int main() {
         return 1;
     }
 
+    // ========================================================================
+    // SELEÇÃO INTERATIVA DA IMAGEM DE QUERY
+    // ========================================================================
+
+    // Chama menu interativo para usuário escolher a query
+    std::string queryPath = selectQueryImageInteractive();
+
     // Configuração do experimento
     const double threshold = 40.0;
 
-    // QUERY FIXA: Usar RGB REAL da imagem query
+    // Carrega RGB REAL da imagem selecionada
     Image queryPoint(999999, "query.jpg", 128, 128, 128);  // Valores padrão
 
-    std::string queryPath = "./query/query.jpg";
     std::ifstream queryFile(queryPath, std::ios::binary);
     if (queryFile.good()) {
         queryFile.close();
         RealRGB queryColor = extractRealRGBFromImage(queryPath);
 
         if (queryColor.valid) {
-            queryPoint = Image(999999, queryPath, queryColor.r, queryColor.g, queryColor.b);
-            printf("Query REAL carregada: %s\n", queryPath.c_str());
-            printf("RGB REAL extraido: (%.1f, %.1f, %.1f)\n\n", queryColor.r, queryColor.g, queryColor.b);
+            // Extrai nome do arquivo para exibição
+            std::filesystem::path p(queryPath);
+            queryPoint = Image(999999, p.filename().string(), queryColor.r, queryColor.g, queryColor.b);
+            printf("\n✓ Query REAL carregada: %s\n", queryPath.c_str());
+            printf("✓ RGB extraído: (%.1f, %.1f, %.1f)\n\n", queryColor.r, queryColor.g, queryColor.b);
         } else {
-            printf("AVISO: Nao foi possivel processar query/query.jpg\n");
-            printf("Usando query padrao RGB(128, 128, 128)\n\n");
+            printf("\n⚠ AVISO: Não foi possível processar a imagem\n");
+            printf("  Usando query padrão RGB(128, 128, 128)\n\n");
         }
     } else {
-        printf("AVISO: Arquivo query/query.jpg nao encontrado\n");
-        printf("Usando query padrao RGB(128, 128, 128)\n\n");
+        printf("\n⚠ AVISO: Arquivo não encontrado: %s\n", queryPath.c_str());
+        printf("  Usando query padrão RGB(128, 128, 128)\n\n");
     }
 
     // Escalas de teste adaptativas baseadas no dataset
@@ -408,7 +1056,16 @@ int main() {
     // Para cada escala
     for (int scale : scales) {
         printf("\n[TESTANDO] Escala: %d imagens REAIS\n", scale);
-        printf("Carregando dataset...\n");
+
+        // CARREGA DATASET UMA VEZ (eficiente!)
+        printf("Carregando %d imagens...\n", scale);
+        auto dataset = loadRealDataset(scale, "./images/");
+
+        if (dataset.empty()) {
+            printf("  ERRO: Dataset vazio, pulando esta escala\n");
+            continue;
+        }
+        printf("Dataset carregado: %d imagens\n\n", (int)dataset.size());
 
         // Lista de estruturas a testar
         std::vector<std::string> structures = {
@@ -421,6 +1078,7 @@ int main() {
             "MTree_Search"
         };
 
+        // Testa TODAS as estruturas com o MESMO dataset
         for (const auto& structName : structures) {
             std::unique_ptr<ImageDatabase> structure;
 
@@ -441,15 +1099,7 @@ int main() {
                 structure = std::make_unique<MTree_Search>(10);  // capacity=10
             }
 
-            // Carrega dataset REAL para esta estrutura (CREATE→TEST→DESTROY pattern)
-            auto dataset = loadRealDataset(scale, "./images/");
-
-            if (dataset.empty()) {
-                printf("  ERRO: Dataset vazio para %s\n", structName.c_str());
-                continue;
-            }
-
-            // Executa benchmark
+            // Executa benchmark (dataset já carregado!)
             auto result = benchmarkStructure(std::move(structure), dataset, queryPoint, threshold);
             allResults.push_back(result);
 
@@ -460,19 +1110,30 @@ int main() {
                    result.searchTime,
                    result.resultsFound);
 
-            // Dataset sai de escopo aqui e libera memória
+            // Estrutura sai de escopo e libera memória
         }
+
+        // Dataset sai de escopo aqui e libera memória
+        printf("Liberando dataset de %d imagens...\n", scale);
     }
 
     // ========================================================================
-    // SALVAR RESULTADOS EM ARQUIVO
+    // SALVAR RESULTADOS EM ARQUIVO COM TIMESTAMP ÚNICO
     // ========================================================================
 
-    std::ofstream outFile("resultados/resultados.txt");
+    // Gera nome de arquivo único com timestamp
+    std::string timestamp = generateTimestamp();
+    std::string filename = "resultados/resultados_" + timestamp + ".txt";
+    std::string fallbackFilename = "resultados_" + timestamp + ".txt";
+
+    std::ofstream outFile(filename);
     if (!outFile.is_open()) {
         // Se não conseguir criar na pasta resultados, tenta no diretório atual
-        outFile.open("resultados.txt");
+        outFile.open(fallbackFilename);
+        filename = fallbackFilename; // Atualiza para mostrar ao usuário
     }
+
+    printf("Salvando resultados em: %s\n", filename.c_str());
 
     // ========================================================================
     // TABELA FINAL ORGANIZADA
@@ -645,7 +1306,7 @@ int main() {
     printf("==================================================================================\n");
     printf("Benchmark Concluído!\n");
     printf("  - Dataset: %d imagens REAIS de ./images/\n", totalImagesAvailable);
-    printf("  - RGB extraído de arquivos reais (não sintético!)\n");
+    printf("  - RGB extraído de arquivos reais \n");
     printf("  - Query: RGB(%.0f, %.0f, %.0f) de %s\n",
            queryPoint.r, queryPoint.g, queryPoint.b, queryPath.c_str());
     printf("  - Threshold: %.1f\n", threshold);
@@ -658,7 +1319,7 @@ int main() {
         char buf[512];
         snprintf(buf, sizeof(buf), "  - Dataset: %d imagens REAIS de ./images/\n", totalImagesAvailable);
         outFile << buf;
-        outFile << "  - RGB extraído de arquivos reais (não sintético!)\n";
+        outFile << "  - RGB extraído de arquivos reais \n";
         snprintf(buf, sizeof(buf), "  - Query: RGB(%.0f, %.0f, %.0f) de %s\n",
                  queryPoint.r, queryPoint.g, queryPoint.b, queryPath.c_str());
         outFile << buf;
@@ -668,7 +1329,7 @@ int main() {
         outFile << "==================================================================================\n";
 
         outFile.close();
-        printf("\n✅ Resultados salvos em: resultados/resultados.txt\n");
+        printf("\n Resultados salvos em: resultados/resultados.txt\n");
     }
 
     return 0;
