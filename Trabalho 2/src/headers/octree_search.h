@@ -127,9 +127,9 @@ private:
         // Se e folha e nao excedeu o threshold, adiciona aqui
         if (node->isLeaf) {
             node->images.push_back(img);
-            
+
             // Se excedeu o threshold, divide o no
-            if (node->images.size() > maxImagesPerNode) {
+            if (node->images.size() > static_cast<size_t>(maxImagesPerNode)) {
                 node->createChildren();
                 
                 // Redistribui as imagens existentes para os filhos
