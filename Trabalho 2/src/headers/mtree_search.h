@@ -201,8 +201,8 @@ private:
         }
 
         // Calcula covering radius para cada novo nó
-        double radius1 = computeCoveringRadius(newNode1.get());
         double radius2 = computeCoveringRadius(newNode2.get());
+        // radius1 não é necessário pois newNode1 será o nó atual
 
         // Substitui nó original pelo primeiro novo nó
         node->entries = std::move(newNode1->entries);
