@@ -1,0 +1,82 @@
+
+
+==================================================================================
+RESULTADOS FINAIS - COMPARAÇÃO COMPLETA (7 ESTRUTURAS)
+==================================================================================
+
+Dataset    Estrutura                                       Insert(ms)   Search(ms)      Found
+--------------------------------------------------------------------------------------------
+1000       Linear Search                                         0.01         0.41        303
+           Hash Search (Dynamic, cell=30.000000)                 0.20         0.08        387
+           Hash Dynamic Search                                   0.18         0.07        303
+           Quadtree Iterative (maxPerNode=25)                    0.22         0.09        303
+           Octree Search (maxPerNode=10)                         0.21         0.06        303
+           LSH Search (L=10, k=4, w=50.000000)                   2.95         0.23        288
+           M-Tree Search (capacity=10)                           0.35         0.06        282
+--------------------------------------------------------------------------------------------
+5000       Linear Search                                         0.29         0.40       1483
+           Hash Search (Dynamic, cell=30.000000)                 0.66         0.47       1907
+           Hash Dynamic Search                                   0.82         0.37       1483
+           Quadtree Iterative (maxPerNode=25)                    1.15         0.38       1483
+           Octree Search (maxPerNode=10)                         0.94         0.37       1483
+           LSH Search (L=10, k=4, w=50.000000)                  11.47         0.75       1423
+           M-Tree Search (capacity=10)                           1.91         0.33       1265
+--------------------------------------------------------------------------------------------
+10000      Linear Search                                         0.39         0.82       3109
+           Hash Search (Dynamic, cell=30.000000)                 1.40         1.00       3987
+           Hash Dynamic Search                                   1.51         0.77       3109
+           Quadtree Iterative (maxPerNode=25)                    2.23         0.77       3109
+           Octree Search (maxPerNode=10)                         2.02         0.81       3109
+           LSH Search (L=10, k=4, w=50.000000)                  20.41         1.58       2997
+           M-Tree Search (capacity=10)                           4.15         0.77       2694
+--------------------------------------------------------------------------------------------
+25000      Linear Search                                         0.83         2.14       7992
+           Hash Search (Dynamic, cell=30.000000)                 3.36         3.03      10203
+           Hash Dynamic Search                                   3.63         2.06       7992
+           Quadtree Iterative (maxPerNode=25)                    6.87         2.06       7992
+           Octree Search (maxPerNode=10)                         6.15         2.50       7992
+           LSH Search (L=10, k=4, w=50.000000)                  50.37         4.31       7668
+           M-Tree Search (capacity=10)                          10.90         2.32       7272
+--------------------------------------------------------------------------------------------
+26179      Linear Search                                         0.80         2.50       8380
+           Hash Search (Dynamic, cell=30.000000)                 3.76         2.99      10697
+           Hash Dynamic Search                                   4.05         2.35       8380
+           Quadtree Iterative (maxPerNode=25)                    6.73         2.44       8380
+           Octree Search (maxPerNode=10)                         6.50         2.07       8380
+           LSH Search (L=10, k=4, w=50.000000)                  56.03         4.86       8039
+           M-Tree Search (capacity=10)                          12.21         2.53       7650
+--------------------------------------------------------------------------------------------
+
+ANÁLISE DE VENCEDORES POR ESCALA:
+==================================================================================
+1000       | Insert: Linear Search             (   0.01ms) | Search: M-Tree Search (capacity=10) (   0.06ms)
+5000       | Insert: Linear Search             (   0.29ms) | Search: M-Tree Search (capacity=10) (   0.33ms)
+10000      | Insert: Linear Search             (   0.39ms) | Search: Hash Dynamic Search       (   0.77ms)
+25000      | Insert: Linear Search             (   0.83ms) | Search: Hash Dynamic Search       (   2.06ms)
+26179      | Insert: Linear Search             (   0.80ms) | Search: Octree Search (maxPerNode=10) (   2.07ms)
+
+==================================================================================
+COMPARAÇÃO: TRABALHO 1 (Estruturas Básicas) vs TRABALHO 2 (Alta Dimensão)
+==================================================================================
+
+TRABALHO 1 - Estruturas Básicas (5 estruturas):
+  [✓] Linear Search         - Baseline força bruta O(n)
+  [✓] Hash Search          - Spatial hashing 3D O(1) esperado
+  [✓] Hash Dynamic Search  - Expansão adaptativa
+  [✓] Octree Search        - Árvore espacial 3D recursiva
+  [✓] Quadtree Search      - Árvore espacial 2D iterativa
+
+TRABALHO 2 - Alta Dimensionalidade (2 estruturas NOVAS):
+  [🆕] LSH Search          - Locality-Sensitive Hashing (busca aproximada)
+  [🆕] M-Tree Search       - Metric Tree (busca exata com poda triangular)
+
+TOTAL: 7 estruturas comparadas com IMAGENS REAIS!
+
+==================================================================================
+Benchmark Concluído!
+  - Dataset: 26179 imagens REAIS de ./images/
+  - RGB extraído de arquivos reais (não sintético!)
+  - Query: RGB(102, 101, 104) de ./query/query.jpg
+  - Threshold: 40.0
+  - Métricas: Tempo de inserção, tempo de busca, precisão
+==================================================================================
